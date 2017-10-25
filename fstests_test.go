@@ -18,15 +18,15 @@ func ExampleInitTempDir() {
 	}
 	defer cleanup()
 
-	fmt.Printf("Here goes using the temporary directory in %s\n", root)
+	fmt.Printf("Here goes the code using the temporary directory at %s\n", root)
 }
 
-func TestTempDir(t *testing.T) {
+func TestInitTempDir(t *testing.T) {
 
 	// Get the values and create the test root dir to be tested
 	testRootDir, cleanup := InitTempDir()
 	if testRootDir == "" {
-		log.Fatal("Failed to create a temporary directory")
+		t.Fatal("Failed to create a temporary directory")
 	}
 
 	// Check that the returned testRootDir is Stat-able

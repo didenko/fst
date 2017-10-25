@@ -12,15 +12,19 @@
 // 3. Write a provided test data to files
 // 4. Contain all test activity in a temporatry directory
 package fstests // import "didenko.com/go/fstests"
+
 import (
 	"io/ioutil"
 	"log"
 	"os"
 )
 
+var noop = func() {}
+
 // InitTempDir function creates a directory for holding
 // temporary files according to platform preferences and
 // returns the directory name and a cleanup function.
+//
 // If there was an error while creating the temporary
 // directory, then the returned directory name is empty,
 // cleanup funcion is a noop, and the temp folder is
@@ -29,7 +33,7 @@ func InitTempDir() (string, func()) {
 	root, err := ioutil.TempDir("", "")
 	if err != nil {
 		os.RemoveAll(root)
-		return "", func() {}
+		return "", noop
 	}
 
 	return root, func() {
