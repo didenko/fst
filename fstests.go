@@ -118,6 +118,14 @@ func copyTree(src, dst string) error {
 		})
 }
 
+// TreeDiffs produces a slice of human-readable notes about
+// recursive differences between two directory trees on a
+// filesystem. Only plan directories and plain files are
+// compared in the tree. The follwing attributes are compared:
+//
+// 1. Name
+// 2. Size
+// 3. Permissions
 func TreeDiffs(a string, b string) []string {
 	var diags []string
 
