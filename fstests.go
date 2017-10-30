@@ -11,9 +11,11 @@
 // 2. Create a directory hierarchy via a copy of a template
 // 3. Write a provided test data to files
 // 4. Contain all test activity in a temporatry directory
+// 5. Compare two directories recursively
 package fstests // import "didenko.com/go/fstests"
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -114,4 +116,61 @@ func copyTree(src, dst string) error {
 				return err
 			}
 		})
+}
+
+func TreeDiffs(a string, b string) []string {
+	var diags []string
+
+	listA, err := collectFileInfo(a)
+	if err != nil {
+		return []string{fmt.Sprintf("Failed to collect entries from \"%s\" with error %v\n", a, err)}
+	}
+
+	listB, err := collectFileInfo(b)
+	if err != nil {
+		return []string{fmt.Sprintf("Failed to collect entries from \"%s\" with error %v\n", b, err)}
+	}
+
+	onlyA, onlyB := collectDifferent(listA, listB)
+
+	if len(onlyA) > 0 {
+		diags = append(diags, fmt.Sprintf("Unique items from \"%s\": %v\n", a, onlyA))
+	}
+	if len(onlyB) > 0 {
+		diags = append(diags, fmt.Sprintf("Unique items from \"%s\": %v\n", b, onlyB))
+	}
+
+	return diags
+}
+
+func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileInfo) {
+
+	onlyLeft = make([]os.FileInfo, 0)
+	onlyRight = make([]os.FileInfo, 0)
+
+	for l, r := 0, 0; l < len(left) || r < len(right); {
+
+		if r < len(right) && (l == len(left) || less(right[r], left[l])) {
+			onlyRight = append(onlyRight, right[r])
+			r++
+			continue
+		}
+
+		if l < len(left) && (r == len(right) || less(left[l], right[r])) {
+			onlyLeft = append(onlyLeft, left[l])
+			l++
+			continue
+		}
+
+		// FIXME: Filenames same, compare:
+		// TODO: size
+		// TODO: content
+		// TODO: permissions?
+		// TODO: ACLs?
+
+		l++
+		r++
+	}
+
+	return onlyLeft, onlyRight
 }

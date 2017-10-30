@@ -83,8 +83,8 @@ func TestCloneTempDir(t *testing.T) {
 		t.Errorf("Returned temporary path \"%s\" is not a directory", testRootDir)
 	}
 
-	if treesAreDifferent(src, testRootDir) {
-		t.Errorf("Trees at \"%s\" and \"%s\" differ unexpectedly", src, testRootDir)
+	if diffs := TreeDiffs(src, testRootDir); diffs != nil {
+		t.Errorf("Trees at \"%s\" and \"%s\" differ unexpectedly: %v", src, testRootDir, diffs)
 	}
 
 	// run the resulting cleaup function for tests below
