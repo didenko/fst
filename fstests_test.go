@@ -12,9 +12,9 @@ import (
 
 func ExampleInitTempDir() {
 
-	root, cleanup := InitTempDir()
-	if root == "" {
-		log.Fatal("Failed to create a temporary directory")
+	root, cleanup, err := InitTempDir()
+	if err != nil {
+		log.Fatal(err)
 	}
 	defer cleanup()
 
@@ -24,9 +24,9 @@ func ExampleInitTempDir() {
 func TestInitTempDir(t *testing.T) {
 
 	// Get the values and create the test root dir to be tested
-	testRootDir, cleanup := InitTempDir()
-	if testRootDir == "" {
-		t.Fatal("Failed to create a temporary directory")
+	testRootDir, cleanup, err := InitTempDir()
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	// Check that the returned testRootDir is Stat-able
@@ -53,9 +53,9 @@ func TestInitTempDir(t *testing.T) {
 
 func ExampleCloneTempDir() {
 
-	root, cleanup := CloneTempDir("./mock")
-	if root == "" {
-		log.Fatal("Failed to clone a temporary directory")
+	root, cleanup, err := CloneTempDir("./mock")
+	if err != nil {
+		log.Fatal(err)
 	}
 	defer cleanup()
 
@@ -67,9 +67,9 @@ func TestCloneTempDir(t *testing.T) {
 	const src string = "./mock"
 
 	// Get the values and create the test root dir to be tested
-	testRootDir, cleanup := CloneTempDir(src)
-	if testRootDir == "" {
-		t.Fatal("Failed to clone a temporary directory")
+	testRootDir, cleanup, err := CloneTempDir(src)
+	if err != nil {
+		t.Fatal(err)
 	}
 
 	// Check that the returned testRootDir is Stat-able

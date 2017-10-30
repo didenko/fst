@@ -14,6 +14,7 @@
 package fstests // import "didenko.com/go/fstests"
 
 import (
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -30,11 +31,11 @@ var noop = func() {}
 // directory, then the returned directory name is empty,
 // cleanup funcion is a noop, and the temp folder is
 // expected to be already removed.
-func InitTempDir() (string, func()) {
+func InitTempDir() (string, func(), error) {
 	root, err := ioutil.TempDir("", "")
 	if err != nil {
 		os.RemoveAll(root)
-		return "", noop
+		return "", noop, err
 	}
 
 	return root, func() {
@@ -42,7 +43,7 @@ func InitTempDir() (string, func()) {
 		if err != nil {
 			log.Fatalf("Error while removing the temporary directory %s", root)
 		}
-	}
+	}, nil
 }
 
 // CloneTempDir function creates a copy of an existing
@@ -54,26 +55,63 @@ func InitTempDir() (string, func()) {
 // directory, then the returned directory name is empty,
 // cleanup funcion is a noop, and the temp folder is
 // expected to be already removed.
-func CloneTempDir(src string) (string, func()) {
-	root, cleanup := InitTempDir()
-	if root == "" {
-		return "", noop
+func CloneTempDir(src string) (string, func(), error) {
+	root, cleanup, err := InitTempDir()
+	if err != nil {
+		return "", noop, err
 	}
 
-	err := copyTree(src, root)
+	err = copyTree(src, root)
 	if err != nil {
 		cleanup()
-		return "", noop
+		return "", noop, err
 	}
 
-	return root, cleanup
+	return root, cleanup, nil
 }
 
 func copyTree(src, dst string) error {
-	return filepath.Walk(src, func(path string, f os.FileInfo, err error) error {
 
-		// FIXME
+	srcClean := filepath.Clean(src)
+	srcLen := len(srcClean)
 
-		return nil
-	})
+	return filepath.Walk(
+		srcClean,
+		func(fn string, fi os.FileInfo, er error) error {
+
+			if er != nil || len(fn) <= srcLen {
+				return er
+			}
+
+			dest := filepath.Join(dst, fn[srcLen:])
+
+			switch mode := fi.Mode(); mode {
+
+			case os.ModeDir:
+				// FIXME: set a proper mode
+				return os.MkdirAll(dest, 0750)
+
+			case os.ModeDevice,
+				os.ModeNamedPipe,
+				os.ModeSocket,
+				os.ModeSymlink,
+				os.ModeTemporary:
+				return nil
+
+			default:
+				// FIXME: set a proper mode
+				srcf, err := os.Open(fn)
+				if err != nil {
+					return err
+				}
+
+				dstf, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0640)
+				if err != nil {
+					return err
+				}
+
+				_, err = io.Copy(dstf, srcf)
+				return err
+			}
+		})
 }

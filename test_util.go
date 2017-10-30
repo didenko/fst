@@ -78,6 +78,12 @@ func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileI
 			continue
 		}
 
+		// FIXME: Filenames same, compare:
+		// TODO: size
+		// TODO: content
+		// TODO: permissions?
+		// TODO: ACLs?
+
 		l++
 		r++
 	}
