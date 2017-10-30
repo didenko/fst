@@ -87,20 +87,7 @@ func copyTree(src, dst string) error {
 
 			dest := filepath.Join(dst, fn[srcLen:])
 
-			switch mode := fi.Mode(); mode {
-
-			case os.ModeDir:
-				// FIXME: set a proper mode
-				return os.MkdirAll(dest, 0750)
-
-			case os.ModeDevice,
-				os.ModeNamedPipe,
-				os.ModeSocket,
-				os.ModeSymlink,
-				os.ModeTemporary:
-				return nil
-
-			default:
+			if fi.Mode().IsRegular() {
 				// FIXME: set a proper mode
 				srcf, err := os.Open(fn)
 				if err != nil {
@@ -115,6 +102,12 @@ func copyTree(src, dst string) error {
 				_, err = io.Copy(dstf, srcf)
 				return err
 			}
+
+			if fi.IsDir() {
+				return os.MkdirAll(dest, 0750)
+			}
+
+			return nil
 		})
 }
 
@@ -171,7 +164,6 @@ func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileI
 		}
 
 		// FIXME: Filenames same, compare:
-		// TODO: size
 		// TODO: content
 		// TODO: permissions?
 		// TODO: ACLs?
