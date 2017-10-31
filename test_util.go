@@ -21,9 +21,3 @@ func collectFileInfo(dir string) ([]os.FileInfo, error) {
 
 	return list, err
 }
-
-func less(left, right os.FileInfo) bool {
-	return left.Name() < right.Name() ||
-		left.IsDir() != right.IsDir() ||
-		left.Size() < right.Size()
-}

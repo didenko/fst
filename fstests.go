@@ -25,6 +25,11 @@ import (
 
 var noop = func() {}
 
+type dirEntry struct {
+	name string
+	perm os.FileMode
+}
+
 // InitTempDir function creates a directory for holding
 // temporary files according to platform preferences and
 // returns the directory name and a cleanup function.
@@ -41,9 +46,34 @@ func InitTempDir() (string, func(), error) {
 	}
 
 	return root, func() {
-		err := os.RemoveAll(root)
+		dirs := make([]string, 0)
+
+		err := filepath.Walk(
+			root,
+			func(fn string, fi os.FileInfo, er error) error {
+
+				if fi.IsDir() {
+					err = os.Chmod(fn, 0700)
+					if err != nil {
+						return err
+					}
+
+					dirs = append(dirs, fn)
+					return nil
+				}
+
+				return os.Remove(fn)
+			})
+
 		if err != nil {
-			log.Fatalf("Error while removing the temporary directory %s", root)
+			log.Fatalln(err)
+		}
+
+		for i := len(dirs) - 1; i >= 0; i-- {
+			err = os.RemoveAll(dirs[i])
+			if err != nil {
+				log.Fatalln(err)
+			}
 		}
 	}, nil
 }
@@ -57,6 +87,12 @@ func InitTempDir() (string, func(), error) {
 // directory, then the returned directory name is empty,
 // cleanup funcion is a noop, and the temp folder is
 // expected to be already removed.
+//
+// The clone attempts to maintain the basic original Unix
+// permissions (9-bit only, from the rxwrwxrwx set).
+// If, however, the user does not have read permission
+// for a file, or read+execute permission for a directory,
+// then the clone process will naturally fail.
 func CloneTempDir(src string) (string, func(), error) {
 	root, cleanup, err := InitTempDir()
 	if err != nil {
@@ -76,10 +112,15 @@ func copyTree(src, dst string) error {
 
 	srcClean := filepath.Clean(src)
 	srcLen := len(srcClean)
+	dirs := make([]*dirEntry, 0)
 
-	return filepath.Walk(
+	err := filepath.Walk(
 		srcClean,
 		func(fn string, fi os.FileInfo, er error) error {
+
+			// TODO: set proper permissions, including 10-12 bits
+			// TODO: set proper ownership
+			// TODO: set proper timestamps
 
 			if er != nil || len(fn) <= srcLen {
 				return er
@@ -88,13 +129,18 @@ func copyTree(src, dst string) error {
 			dest := filepath.Join(dst, fn[srcLen:])
 
 			if fi.Mode().IsRegular() {
-				// FIXME: set a proper mode
+
 				srcf, err := os.Open(fn)
 				if err != nil {
 					return err
 				}
 
-				dstf, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0640)
+				dstf, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0600)
+				if err != nil {
+					return err
+				}
+
+				err = dstf.Chmod(fi.Mode().Perm())
 				if err != nil {
 					return err
 				}
@@ -104,11 +150,25 @@ func copyTree(src, dst string) error {
 			}
 
 			if fi.IsDir() {
-				return os.MkdirAll(dest, 0750)
+				dirs = append(dirs, &dirEntry{dest, fi.Mode().Perm()})
+				return os.Mkdir(dest, 0700)
 			}
 
 			return nil
 		})
+
+	if err != nil {
+		return err
+	}
+
+	for i := len(dirs) - 1; i >= 0; i-- {
+		err := os.Chmod(dirs[i].name, dirs[i].perm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // TreeDiffs produces a slice of human-readable notes about
@@ -118,7 +178,7 @@ func copyTree(src, dst string) error {
 //
 // 1. Name
 // 2. Size
-// 3. Permissions
+// 3. Permissions (only Unix's 9 bits)
 func TreeDiffs(a string, b string) []string {
 	var diags []string
 
@@ -163,14 +223,23 @@ func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileI
 			continue
 		}
 
-		// FIXME: Filenames same, compare:
-		// TODO: content
-		// TODO: permissions?
-		// TODO: ACLs?
+		// FIXME: Filenames same, compare content
 
 		l++
 		r++
 	}
 
 	return onlyLeft, onlyRight
+}
+
+func less(left, right os.FileInfo) bool {
+
+	// TODO: test high (10-12) permission bits
+	// TODO: test ownership
+	// TODO: test timestamps
+
+	return left.Name() < right.Name() ||
+		left.IsDir() != right.IsDir() ||
+		left.Size() < right.Size() ||
+		left.Mode().Perm() < right.Mode().Perm()
 }
