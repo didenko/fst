@@ -12,7 +12,7 @@
 // 3. Write a provided test data to files
 // 4. Contain all test activity in a temporatry directory
 // 5. Compare two directories recursively
-package fstests // import "didenko.com/go/fstests"
+package fstests // import "go.didenko.com/fstests"
 
 import (
 	"fmt"

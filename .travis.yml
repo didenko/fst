@@ -1,5 +1,5 @@
 language: go
-go_import_path: didenko.com/go/fstests
+go_import_path: go.didenko.com/fstests
 
 go:
   - 1.7.x

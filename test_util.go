@@ -1,7 +1,7 @@
 // Copyright 2017 Vlad Didenko. All rights reserved.
 // See the included LICENSE.md file for licensing information
 
-package fstests // import "didenko.com/go/fstests"
+package fstests // import "go.didenko.com/fstests"
 
 import (
 	"os"
