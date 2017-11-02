@@ -192,10 +192,18 @@ func TreeDiffs(a string, b string) []string {
 	onlyA, onlyB := collectDifferent(listA, listB)
 
 	if len(onlyA) > 0 {
-		diags = append(diags, fmt.Sprintf("Unique items from \"%s\": %v\n", a, onlyA))
+		diagA := fmt.Sprintf("Unique items from \"%s\": \n", a)
+		for _, fi := range onlyA {
+			diagA = diagA + fmt.Sprintf("%v: dir:%v, sz:%v, mode:%v, time:%v\n", fi.Name(), fi.IsDir(), fi.Size(), fi.Mode(), fi.ModTime())
+		}
+		diags = append(diags, diagA)
 	}
 	if len(onlyB) > 0 {
-		diags = append(diags, fmt.Sprintf("Unique items from \"%s\": %v\n", b, onlyB))
+		diagB := fmt.Sprintf("Unique items from \"%s\": \n", b)
+		for _, fi := range onlyB {
+			diagB = diagB + fmt.Sprintf("%v: dir:%v, sz:%v, mode:%v, time:%v\n", fi.Name(), fi.IsDir(), fi.Size(), fi.Mode(), fi.ModTime())
+		}
+		diags = append(diags, diagB)
 	}
 
 	return diags
