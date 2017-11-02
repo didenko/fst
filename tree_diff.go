@@ -17,6 +17,7 @@ package fstests // import "go.didenko.com/fstests"
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -96,4 +97,18 @@ func less(left, right os.FileInfo) bool {
 		left.Size() < right.Size() ||
 		left.Mode() < right.Mode() ||
 		left.ModTime().Before(right.ModTime().Add(-5*time.Millisecond))
+}
+
+func collectFileInfo(dir string) ([]os.FileInfo, error) {
+
+	list := []os.FileInfo{}
+
+	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
+		if err == nil && path != dir {
+			list = append(list, f)
+		}
+		return err
+	})
+
+	return list, err
 }
