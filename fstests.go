@@ -119,7 +119,6 @@ func copyTree(src, dst string) error {
 		func(fn string, fi os.FileInfo, er error) error {
 
 			// TODO: set proper permissions, including 10-12 bits
-			// TODO: set proper ownership
 			// TODO: set proper timestamps
 
 			if er != nil || len(fn) <= srcLen {
@@ -235,7 +234,6 @@ func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileI
 func less(left, right os.FileInfo) bool {
 
 	// TODO: test high (10-12) permission bits
-	// TODO: test ownership
 	// TODO: test timestamps
 
 	return left.Name() < right.Name() ||
