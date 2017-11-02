@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 var noop = func() {}
@@ -28,6 +29,7 @@ var noop = func() {}
 type dirEntry struct {
 	name string
 	perm os.FileMode
+	time time.Time
 }
 
 // InitTempDir function creates a directory for holding
@@ -118,8 +120,6 @@ func copyTree(src, dst string) error {
 		srcClean,
 		func(fn string, fi os.FileInfo, er error) error {
 
-			// TODO: set proper timestamps
-
 			if er != nil || len(fn) <= srcLen {
 				return er
 			}
@@ -143,14 +143,30 @@ func copyTree(src, dst string) error {
 					return err
 				}
 
-				return dstf.Chmod(fi.Mode())
+				err = srcf.Close()
+				if err != nil {
+					return err
+				}
+
+				err = dstf.Close()
+				if err != nil {
+					return err
+				}
+
+				err = os.Chmod(dest, fi.Mode())
+				if err != nil {
+					return err
+				}
+
+				destMT := fi.ModTime()
+				return os.Chtimes(dest, destMT, destMT)
 			}
 
 			if fi.Mode().IsDir() {
-				dirs = append(dirs, &dirEntry{dest, fi.Mode().Perm()})
+
+				dirs = append(dirs, &dirEntry{dest, fi.Mode().Perm(), fi.ModTime()})
 				return os.Mkdir(dest, 0700)
 			}
-
 			return nil
 		})
 
@@ -160,6 +176,11 @@ func copyTree(src, dst string) error {
 
 	for i := len(dirs) - 1; i >= 0; i-- {
 		err := os.Chmod(dirs[i].name, dirs[i].perm)
+		if err != nil {
+			return err
+		}
+
+		err = os.Chtimes(dirs[i].name, dirs[i].time, dirs[i].time)
 		if err != nil {
 			return err
 		}
@@ -239,10 +260,9 @@ func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileI
 
 func less(left, right os.FileInfo) bool {
 
-	// TODO: test timestamps
-
 	return left.Name() < right.Name() ||
 		left.IsDir() != right.IsDir() ||
 		left.Size() < right.Size() ||
-		left.Mode() < right.Mode()
+		left.Mode() < right.Mode() ||
+		left.ModTime().Before(right.ModTime().Add(-5*time.Millisecond))
 }
