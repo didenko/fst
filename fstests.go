@@ -118,7 +118,6 @@ func copyTree(src, dst string) error {
 		srcClean,
 		func(fn string, fi os.FileInfo, er error) error {
 
-			// TODO: set proper permissions, including 10-12 bits
 			// TODO: set proper timestamps
 
 			if er != nil || len(fn) <= srcLen {
@@ -139,16 +138,15 @@ func copyTree(src, dst string) error {
 					return err
 				}
 
-				err = dstf.Chmod(fi.Mode().Perm())
+				_, err = io.Copy(dstf, srcf)
 				if err != nil {
 					return err
 				}
 
-				_, err = io.Copy(dstf, srcf)
-				return err
+				return dstf.Chmod(fi.Mode())
 			}
 
-			if fi.IsDir() {
+			if fi.Mode().IsDir() {
 				dirs = append(dirs, &dirEntry{dest, fi.Mode().Perm()})
 				return os.Mkdir(dest, 0700)
 			}
@@ -177,7 +175,7 @@ func copyTree(src, dst string) error {
 //
 // 1. Name
 // 2. Size
-// 3. Permissions (only Unix's 9 bits)
+// 3. Permissions (only Unix's 12 bits)
 func TreeDiffs(a string, b string) []string {
 	var diags []string
 
@@ -233,11 +231,10 @@ func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileI
 
 func less(left, right os.FileInfo) bool {
 
-	// TODO: test high (10-12) permission bits
 	// TODO: test timestamps
 
 	return left.Name() < right.Name() ||
 		left.IsDir() != right.IsDir() ||
 		left.Size() < right.Size() ||
-		left.Mode().Perm() < right.Mode().Perm()
+		left.Mode() < right.Mode()
 }
