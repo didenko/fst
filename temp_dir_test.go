@@ -64,7 +64,7 @@ func ExampleCloneTempDir() {
 
 func TestCloneTempDir(t *testing.T) {
 
-	const src string = "./mock"
+	const src string = "./temp_dir_mocks"
 
 	// Get the values and create the test root dir to be tested
 	testRootDir, cleanup, err := CloneTempDir(src)
