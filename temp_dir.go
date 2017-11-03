@@ -1,7 +1,7 @@
 // Copyright 2017 Vlad Didenko. All rights reserved.
 // See the included LICENSE.md file for licensing information
 
-// Package fstests is a collection of functions to help
+// Package fstest is a collection of functions to help
 // testing filesyste objects modifications. It focuses
 // on creating and cleaning up a baseline filesyetem state.
 //
@@ -12,7 +12,7 @@
 // 3. Write a provided test data to files
 // 4. Contain all test activity in a temporatry directory
 // 5. Compare two directories recursively
-package fstests // import "go.didenko.com/fstests"
+package fstest // import "go.didenko.com/fstest"
 
 import (
 	"io/ioutil"
