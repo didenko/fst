@@ -13,7 +13,7 @@ import (
 // TreeDiffs produces a slice of human-readable notes about
 // recursive differences between two directory trees on a
 // filesystem. Only plan directories and plain files are
-// compared in the tree. The follwing attributes are compared:
+// compared in the tree. The following attributes are compared:
 //
 // 1. Name
 //
