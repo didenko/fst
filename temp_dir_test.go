@@ -5,8 +5,10 @@ package fstest // import "go.didenko.com/fstest"
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -48,6 +50,48 @@ func TestInitTempDir(t *testing.T) {
 	_, ok := err.(*os.PathError)
 	if !ok {
 		t.Fatalf("Temporary directory \"%s\" remained after cleanup", testRootDir)
+	}
+}
+
+func TestInitTempDirRestrictedPermissions(t *testing.T) {
+
+	root, cleanup, err := InitTempDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	d := filepath.Join(root, "d")
+	err = os.Mkdir(d, 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := filepath.Join(d, "f")
+	err = ioutil.WriteFile(f, []byte{}, 0700)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Set fully restricted permissions on the file and directory
+	// so that it is clear the cleanup removes them
+	err = os.Chmod(f, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = os.Chmod(d, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// run the resulting cleaup function for tests below
+	cleanup()
+
+	// Check that the testRootDir does not exist after the cleanup
+	_, err = os.Stat(root)
+	_, ok := err.(*os.PathError)
+	if !ok {
+		t.Fatalf("Temporary directory \"%s\" remained after cleanup", root)
 	}
 }
 
