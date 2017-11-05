@@ -23,7 +23,7 @@ type emptyErr struct {
 // Field 1: Time in RFC3339 format, as shown at
 // https://golang.org/pkg/time/#RFC3339
 //
-// Field 2: Octal representation of FileMode, as at
+// Field 2: Octal (required) representation of FileMode, as at
 // https://golang.org/pkg/os/#FileMode
 //
 // Field 3: a path to the directory to be create, until the end
@@ -76,7 +76,7 @@ func DirCreate(config io.Reader) error {
 }
 
 var (
-	re    = regexp.MustCompile(`^([-0-9T:Z]+)\s+(0[0-7]{1,4})\s+(.*)$`)
+	re    = regexp.MustCompile(`^([-0-9T:Z]+)\s+(0[0-7]{0,4})\s+(.*)$`)
 	empty = regexp.MustCompile(`^\s*$`)
 )
 
@@ -93,7 +93,7 @@ func parse(line string) (time.Time, os.FileMode, string, error) {
 		return time.Time{}, 0, "", err
 	}
 
-	perm64, err := strconv.ParseUint(parts[2], 10, 32)
+	perm64, err := strconv.ParseUint(parts[2], 8, 32)
 	if err != nil {
 		return time.Time{}, 0, "", err
 	}
