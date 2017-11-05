@@ -86,7 +86,7 @@ func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileI
 func less(left, right os.FileInfo) bool {
 
 	return left.Name() < right.Name() ||
-		left.IsDir() != right.IsDir() ||
+		(left.IsDir() && !right.IsDir()) ||
 		(!left.IsDir() && (left.Size() < right.Size())) ||
 		left.Mode() < right.Mode() ||
 		left.ModTime().Before(right.ModTime().Add(-5*time.Millisecond))
