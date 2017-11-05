@@ -40,14 +40,14 @@ func TreeDiffs(a string, b string) []string {
 	if len(onlyA) > 0 {
 		diagA := fmt.Sprintf("Unique items from \"%s\": \n", a)
 		for _, fi := range onlyA {
-			diagA = diagA + fmt.Sprintf("%v: dir:%v, sz:%v, mode:%v, time:%v\n", fi.Name(), fi.IsDir(), fi.Size(), fi.Mode(), fi.ModTime())
+			diagA = diagA + fmt.Sprintf("dir:%v, sz:%v, mode:%v, time:%v, name: %v\n", fi.IsDir(), fi.Size(), fi.Mode(), fi.ModTime(), fi.Name())
 		}
 		diags = append(diags, diagA)
 	}
 	if len(onlyB) > 0 {
 		diagB := fmt.Sprintf("Unique items from \"%s\": \n", b)
 		for _, fi := range onlyB {
-			diagB = diagB + fmt.Sprintf("%v: dir:%v, sz:%v, mode:%v, time:%v\n", fi.Name(), fi.IsDir(), fi.Size(), fi.Mode(), fi.ModTime())
+			diagB = diagB + fmt.Sprintf("dir:%v, sz:%v, mode:%v, time:%v, name: %v\n", fi.IsDir(), fi.Size(), fi.Mode(), fi.ModTime(), fi.Name())
 		}
 		diags = append(diags, diagB)
 	}
@@ -87,7 +87,7 @@ func less(left, right os.FileInfo) bool {
 
 	return left.Name() < right.Name() ||
 		left.IsDir() != right.IsDir() ||
-		left.Size() < right.Size() ||
+		(!left.IsDir() && (left.Size() < right.Size())) ||
 		left.Mode() < right.Mode() ||
 		left.ModTime().Before(right.ModTime().Add(-5*time.Millisecond))
 }

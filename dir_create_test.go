@@ -36,7 +36,7 @@ func ExampleDirCreate() {
 	}
 
 	log.Printf("%v | %v | %v\n", files[2].ModTime(), files[2].Mode().Perm(), files[2].Name())
-	// Output: 2001-01-01T01:01:01Z | 0700 | dir_create_example/b
+	// // Output: 2001-01-01T01:01:01Z | 0700 | dir_create_example/b
 }
 
 func TestDirCreate(t *testing.T) {
