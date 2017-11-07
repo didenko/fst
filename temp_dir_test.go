@@ -127,7 +127,7 @@ func TestCloneTempDir(t *testing.T) {
 		t.Errorf("Returned temporary path \"%s\" is not a directory", testRootDir)
 	}
 
-	if diffs := TreeDiffs(src, testRootDir); diffs != nil {
+	if diffs := TreeDiff(src, testRootDir, LessName, LessDir, LessSize, LessPerm, LessTime); diffs != nil {
 		t.Errorf("Trees at \"%s\" and \"%s\" differ unexpectedly: %v", src, testRootDir, diffs)
 	}
 

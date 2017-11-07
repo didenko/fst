@@ -7,10 +7,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 )
 
-// TreeDiffs produces a slice of human-readable notes about
+// TreeDiff produces a slice of human-readable notes about
 // recursive differences between two directory trees on a
 // filesystem. Only plan directories and plain files are
 // compared in the tree. The following attributes are compared:
@@ -22,7 +21,7 @@ import (
 // 3. Permissions (only Unix's 12 bits)
 //
 // 4. Timestamps
-func TreeDiffs(a string, b string) []string {
+func TreeDiff(a string, b string, comps ...FileLess) []string {
 	var diags []string
 
 	listA, err := collectFileInfo(a)
@@ -35,7 +34,7 @@ func TreeDiffs(a string, b string) []string {
 		return []string{fmt.Sprintf("Failed to collect entries from \"%s\" with error %v\n", b, err)}
 	}
 
-	onlyA, onlyB := collectDifferent(listA, listB)
+	onlyA, onlyB := collectDifferent(listA, listB, comps...)
 
 	if len(onlyA) > 0 {
 		diagA := fmt.Sprintf("Unique items from \"%s\": \n", a)
@@ -55,20 +54,20 @@ func TreeDiffs(a string, b string) []string {
 	return diags
 }
 
-func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileInfo) {
+func collectDifferent(left, right []os.FileInfo, comps ...FileLess) (onlyLeft, onlyRight []os.FileInfo) {
 
 	onlyLeft = make([]os.FileInfo, 0)
 	onlyRight = make([]os.FileInfo, 0)
 
 	for l, r := 0, 0; l < len(left) || r < len(right); {
 
-		if r < len(right) && (l == len(left) || less(right[r], left[l])) {
+		if r < len(right) && (l == len(left) || Less(right[r], left[l], comps...)) {
 			onlyRight = append(onlyRight, right[r])
 			r++
 			continue
 		}
 
-		if l < len(left) && (r == len(right) || less(left[l], right[r])) {
+		if l < len(left) && (r == len(right) || Less(left[l], right[r], comps...)) {
 			onlyLeft = append(onlyLeft, left[l])
 			l++
 			continue
@@ -81,15 +80,6 @@ func collectDifferent(left, right []os.FileInfo) (onlyLeft, onlyRight []os.FileI
 	}
 
 	return onlyLeft, onlyRight
-}
-
-func less(left, right os.FileInfo) bool {
-
-	return left.Name() < right.Name() ||
-		(left.IsDir() && !right.IsDir()) ||
-		(!left.IsDir() && (left.Size() < right.Size())) ||
-		left.Mode() < right.Mode() ||
-		left.ModTime().Before(right.ModTime().Add(-5*time.Millisecond))
 }
 
 func collectFileInfo(dir string) ([]os.FileInfo, error) {
