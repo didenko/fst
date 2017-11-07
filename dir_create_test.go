@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func ExampleDirCreate() {
@@ -56,7 +57,25 @@ func ExampleDirCreate() {
 
 func TestDirCreate(t *testing.T) {
 
-	testRootDir, cleanup, err := InitTempDir()
+	dirs := `
+2001-01-01T01:01:01Z 0777 aaa
+2009-01-01T01:01:01Z 0777 aaa/bbb
+
+2002-01-01T01:01:01Z 0777 "has\ttab"
+2002-01-01T01:01:01Z 0777 "\u10077heavy quoted\u10078"`
+
+	expect := []struct {
+		t time.Time
+		p os.FileMode
+		n string
+	}{
+		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0777, "aaa"},
+		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0777, "has\ttab"},
+		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0777, "\u10077heavy quoted\u10078"},
+		{time.Date(2009, time.January, 1, 1, 1, 1, 0, time.UTC), 0777, "aaa/bbb"},
+	}
+
+	root, cleanup, err := InitTempDir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -70,21 +89,46 @@ func TestDirCreate(t *testing.T) {
 		os.Chdir(dir)
 	}(wd)
 
-	err = os.Chdir(testRootDir)
+	err = os.Chdir(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	dirs := `
-2001-01-01T01:01:01Z 0050 aaa
-2999-01-01T01:01:01Z 0700 aaa/bbb
-
-2002-01-01T01:01:01Z 0700 "has\ttab"
-2002-01-01T01:01:01Z 0700 "\u10077heavy quoted\u10078"`
 
 	reader := strings.NewReader(dirs)
 	err = DirCreate(reader)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	files, err := ioutil.ReadDir(".")
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	for i, fi := range files {
+		if fi.Name() != expect[i].n {
+			t.Errorf("Names mismatch, expected \"%v\", got \"%v\"", expect[i].n, fi.Name())
+		}
+		if fi.ModTime().UTC() != expect[i].t {
+			t.Errorf("Times mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[i].t, fi.ModTime().UTC(), expect[i].n)
+		}
+		if fi.Mode().Perm() != expect[i].p {
+			t.Errorf("Permissions mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[i].p, fi.Mode().Perm(), expect[i].n)
+		}
+	}
+
+	f := expect[3].n
+	fi, err := os.Stat(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if fi.ModTime().UTC() != expect[3].t {
+		t.Errorf("Times mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[3].t, fi.ModTime().UTC(), expect[3].n)
+	}
+
+	if fi.Mode().Perm() != expect[3].p {
+		t.Errorf("Permissions mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[3].p, fi.Mode().Perm(), expect[3].n)
 	}
 }
