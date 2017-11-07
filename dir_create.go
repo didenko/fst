@@ -92,6 +92,7 @@ func parse(line string) (time.Time, os.FileMode, string, error) {
 	if err != nil {
 		return time.Time{}, 0, "", err
 	}
+	mt = mt.Round(0)
 
 	perm64, err := strconv.ParseUint(parts[2], 8, 32)
 	if err != nil {

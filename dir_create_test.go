@@ -110,7 +110,7 @@ func TestDirCreate(t *testing.T) {
 		if fi.Name() != expect[i].n {
 			t.Errorf("Names mismatch, expected \"%v\", got \"%v\"", expect[i].n, fi.Name())
 		}
-		if fi.ModTime().UTC() != expect[i].t {
+		if !fi.ModTime().UTC().Equal(expect[i].t) {
 			t.Errorf("Times mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[i].t, fi.ModTime().UTC(), expect[i].n)
 		}
 		if fi.Mode().Perm() != expect[i].p {
@@ -124,7 +124,7 @@ func TestDirCreate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if fi.ModTime().UTC() != expect[3].t {
+	if !fi.ModTime().UTC().Equal(expect[3].t) {
 		t.Errorf("Times mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[3].t, fi.ModTime().UTC(), expect[3].n)
 	}
 
