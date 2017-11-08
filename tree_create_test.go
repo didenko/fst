@@ -4,6 +4,7 @@
 package fstest // import "go.didenko.com/fstest"
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,6 +15,14 @@ import (
 )
 
 func ExampleTreeCreate() {
+
+	dirMark := func(fi os.FileInfo) string {
+		if fi.IsDir() {
+			return "/"
+		}
+		return ""
+	}
+
 	root, cleanup, err := InitTempDir()
 	if err != nil {
 		log.Fatal(err)
@@ -29,14 +38,16 @@ func ExampleTreeCreate() {
 	log.Printf("Temp folder: %v\n", wd)
 
 	dirs := `
-2999-01-01T01:01:01Z 0700 dir_create_example
+		2001-01-01T01:01:01Z	0750	a/
+		2001-01-01T01:01:01Z	0750	b/
+		2001-01-01T01:01:01Z	0700	c.txt	"This is a two line\nfile with\ta tab\n"
+		2001-01-01T01:01:01Z	0700	d.txt	No need to quote a single line without tabs
 
-2001-01-01T01:01:01Z 0750 dir_create_example/a
-2001-01-01T01:01:01Z 0750 dir_create_example/b
+		2002-01-01T01:01:01Z	0700	"has\ttab/"
+		2002-01-01T01:01:01Z	0700	"has\ttab/e.mb"	"# Markdown...\n\n... also ***possible***\n"
 
-2002-01-01T01:01:01Z 0700 "dir_create_example/has\ttab"
-2002-01-01T01:01:01Z 0700 "dir_create_example/\u263asmiles\u263a"
-`
+		2002-01-01T01:01:01Z	0700	"\u263asmiles\u263a/"
+	`
 
 	reader := strings.NewReader(dirs)
 	err = TreeCreate(reader)
@@ -45,34 +56,84 @@ func ExampleTreeCreate() {
 		return
 	}
 
-	files, err := ioutil.ReadDir("dir_create_example")
+	files, err := ioutil.ReadDir(".")
 	if err != nil {
 		log.Printf("%v\n", err)
 		return
 	}
 
-	fmt.Printf("%v | %v | %v\n", files[1].ModTime().UTC(), files[1].Mode().Perm(), files[1].Name())
-	// Output: 2001-01-01 01:01:01 +0000 UTC | -rwxr-x--- | b
+	fmt.Printf(
+		"%v | %v | %s%s\n",
+		files[1].ModTime().UTC(),
+		files[1].Mode().Perm(),
+		files[1].Name(),
+		dirMark(files[1]),
+	)
+
+	fmt.Printf(
+		"%v | %v | %s%s\n",
+		files[2].ModTime().UTC(),
+		files[2].Mode().Perm(),
+		files[2].Name(),
+		dirMark(files[2]),
+	)
+
+	// Output:
+	// 2001-01-01 01:01:01 +0000 UTC | -rwxr-x--- | b/
+	// 2001-01-01 01:01:01 +0000 UTC | -rwx------ | c.txt
+}
+
+type tcase struct {
+	t time.Time
+	p os.FileMode
+	n string
+	c string
+}
+
+func match(t *testing.T, f *tcase, fi os.FileInfo) {
+
+	if !fi.ModTime().Equal(f.t) {
+		t.Errorf("Times mismatch, expected \"%v\", got \"%v\" for \"%v\"", f.t, fi.ModTime().UTC(), f.n)
+	}
+	if fi.Mode().Perm() != f.p {
+		t.Errorf("Permissions mismatch, expected \"%v\", got \"%v\" for \"%v\"", f.p, fi.Mode().Perm(), f.n)
+	}
+
+	if f.c == "" {
+		return
+	}
+
+	byteContent, err := ioutil.ReadFile(f.n)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !bytes.Equal([]byte(f.c), byteContent) {
+		t.Errorf("Content mismatch, expected \"%v\", got \"%v\" for \"%v\"", f.c, byteContent, f.n)
+	}
 }
 
 func TestTreeCreate(t *testing.T) {
 
 	dirs := `
-2001-01-01T01:01:01Z 0150 aaa
-2099-01-01T01:01:01Z 0700 aaa/bbb
+		2001-01-01T01:01:01Z	0150	aaa/
+		2099-01-01T01:01:01Z	0700	aaa/bbb/
 
-2002-01-01T01:01:01Z 0700 "has\ttab"
-2002-01-01T01:01:01Z 0700 "\u10077heavy quoted\u10078"`
+		2001-01-01T01:01:01Z	0700	c.txt	"This is a two line\nfile with\ta tab\n"
+		2001-01-01T01:01:01Z	0700	d.txt	No need to quote a single line without tabs
 
-	expect := []struct {
-		t time.Time
-		p os.FileMode
-		n string
-	}{
-		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0150, "aaa"},
-		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "has\ttab"},
-		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "\u10077heavy quoted\u10078"},
-		{time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "aaa/bbb"},
+		2002-01-01T01:01:01Z	0700	"has\ttab/"
+		2002-01-01T01:01:01Z	0700	"has\ttab/e.mb"	"# Markdown...\n\n... also ***possible***\n"
+
+		2002-01-01T01:01:01Z	0700	"\u10077heavy quoted\u10078/"`
+
+	expect := []tcase{
+		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0150, "aaa", ""},
+		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "c.txt", ""},
+		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "d.txt", "No need to quote a single line without tabs"},
+		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "has\ttab", ""},
+		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "\u10077heavy quoted\u10078", ""},
+		{time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "aaa/bbb", ""},
 	}
 
 	root, cleanup, err := InitTempDir()
@@ -110,25 +171,16 @@ func TestTreeCreate(t *testing.T) {
 		if fi.Name() != expect[i].n {
 			t.Errorf("Names mismatch, expected \"%v\", got \"%v\"", expect[i].n, fi.Name())
 		}
-		if !fi.ModTime().Equal(expect[i].t) {
-			t.Errorf("Times mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[i].t, fi.ModTime().UTC(), expect[i].n)
+		match(t, &expect[i], fi)
+	}
+
+	for _, tc := range expect {
+		f := tc.n
+		fi, err := os.Stat(f)
+		if err != nil {
+			t.Fatal(err)
 		}
-		if fi.Mode().Perm() != expect[i].p {
-			t.Errorf("Permissions mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[i].p, fi.Mode().Perm(), expect[i].n)
-		}
-	}
 
-	f := expect[3].n
-	fi, err := os.Stat(f)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !fi.ModTime().Equal(expect[3].t) {
-		t.Errorf("Times mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[3].t, fi.ModTime().UTC(), expect[3].n)
-	}
-
-	if fi.Mode().Perm() != expect[3].p {
-		t.Errorf("Permissions mismatch, expected \"%v\", got \"%v\" for \"%v\"", expect[3].p, fi.Mode().Perm(), expect[3].n)
+		match(t, &tc, fi)
 	}
 }
