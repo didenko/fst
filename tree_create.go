@@ -46,10 +46,6 @@ type emptyErr struct {
 // Directory entries ignore Field 4 if present.
 //
 // It is up to the caller to deal with conflicting file and
-// directory names in the input. TreeCreate processes the input
-// line-by-e or weird directory names.
-//
-// It is up to the caller to deal with conflicting file and
 // directory names in the input. TreeCreate processes the
 // input line-by-line and will return with error at a first
 // problem it runs into.
