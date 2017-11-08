@@ -21,7 +21,7 @@ import (
 // 3. Permissions (only Unix's 12 bits)
 //
 // 4. Timestamps
-func TreeDiff(a string, b string, comps ...FileLess) []string {
+func TreeDiff(a string, b string, comps ...FileRank) []string {
 	var diags []string
 
 	listA, err := collectFileInfo(a)
@@ -54,7 +54,7 @@ func TreeDiff(a string, b string, comps ...FileLess) []string {
 	return diags
 }
 
-func collectDifferent(left, right []os.FileInfo, comps ...FileLess) (onlyLeft, onlyRight []os.FileInfo) {
+func collectDifferent(left, right []os.FileInfo, comps ...FileRank) (onlyLeft, onlyRight []os.FileInfo) {
 
 	onlyLeft = make([]os.FileInfo, 0)
 	onlyRight = make([]os.FileInfo, 0)
