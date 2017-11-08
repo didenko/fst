@@ -33,7 +33,7 @@ type emptyErr struct {
 // It allows for creating Unicode or weird directory names.
 //
 // There should be no space before the first field
-func DirCreate(config io.Reader) error {
+func TreeCreate(config io.Reader) error {
 
 	dirs := make([]*dirEntry, 0)
 

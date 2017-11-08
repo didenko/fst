@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-func ExampleDirCreate() {
+func ExampleTreeCreate() {
 	root, cleanup, err := InitTempDir()
 	if err != nil {
 		log.Fatal(err)
@@ -39,7 +39,7 @@ func ExampleDirCreate() {
 `
 
 	reader := strings.NewReader(dirs)
-	err = DirCreate(reader)
+	err = TreeCreate(reader)
 	if err != nil {
 		log.Printf("%v\n", err)
 		return
@@ -55,7 +55,7 @@ func ExampleDirCreate() {
 	// Output: 2001-01-01 01:01:01 +0000 UTC | -rwxr-x--- | b
 }
 
-func TestDirCreate(t *testing.T) {
+func TestTreeCreate(t *testing.T) {
 
 	dirs := `
 2001-01-01T01:01:01Z 0150 aaa
@@ -95,7 +95,7 @@ func TestDirCreate(t *testing.T) {
 	}
 
 	reader := strings.NewReader(dirs)
-	err = DirCreate(reader)
+	err = TreeCreate(reader)
 	if err != nil {
 		t.Fatal(err)
 	}
