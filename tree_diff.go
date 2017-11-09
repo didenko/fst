@@ -12,15 +12,11 @@ import (
 // TreeDiff produces a slice of human-readable notes about
 // recursive differences between two directory trees on a
 // filesystem. Only plan directories and plain files are
-// compared in the tree. The following attributes are compared:
-//
-// 1. Name
-//
-// 2. Size
-//
-// 3. Permissions (only Unix's 12 bits)
-//
-// 4. Timestamps
+// compared in the tree. Specific comparisons are determined
+// By the variadic slice of FileRank functions, like the
+// ones in this package. A commonly used set of comparators
+// is ByName, ByDir, BySize.
+// TODO: , and ByContent
 func TreeDiff(a string, b string, comps ...FileRank) []string {
 	var diags []string
 
@@ -54,10 +50,10 @@ func TreeDiff(a string, b string, comps ...FileRank) []string {
 	return diags
 }
 
-func collectDifferent(left, right []os.FileInfo, comps ...FileRank) (onlyLeft, onlyRight []os.FileInfo) {
+func collectDifferent(left, right []*FileInfoPath, comps ...FileRank) (onlyLeft, onlyRight []*FileInfoPath) {
 
-	onlyLeft = make([]os.FileInfo, 0)
-	onlyRight = make([]os.FileInfo, 0)
+	onlyLeft = make([]*FileInfoPath, 0)
+	onlyRight = make([]*FileInfoPath, 0)
 
 	for l, r := 0, 0; l < len(left) || r < len(right); {
 
@@ -82,13 +78,13 @@ func collectDifferent(left, right []os.FileInfo, comps ...FileRank) (onlyLeft, o
 	return onlyLeft, onlyRight
 }
 
-func collectFileInfo(dir string) ([]os.FileInfo, error) {
+func collectFileInfo(dir string) ([]*FileInfoPath, error) {
 
-	list := []os.FileInfo{}
+	list := make([]*FileInfoPath, 0)
 
 	err := filepath.Walk(dir, func(path string, f os.FileInfo, err error) error {
 		if err == nil && path != dir {
-			list = append(list, f)
+			list = append(list, &FileInfoPath{f, path})
 		}
 		return err
 	})
