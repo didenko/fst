@@ -16,7 +16,10 @@ type dirEntry struct {
 	time time.Time
 }
 
-func copyTree(src, dst string) error {
+// TreeCopy duplicates redular files and directories from
+// inside the source directory into an existing destination
+// directory.
+func TreeCopy(src, dst string) error {
 
 	srcClean := filepath.Clean(src)
 	srcLen := len(srcClean)
