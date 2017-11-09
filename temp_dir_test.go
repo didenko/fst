@@ -48,7 +48,7 @@ func TestInitTempDir(t *testing.T) {
 	// Check that the testRootDir does not exist after the cleanup
 	_, err = os.Stat(testRootDir)
 	_, ok := err.(*os.PathError)
-	if !ok {
+	if err == nil && !ok {
 		t.Fatalf("Temporary directory \"%s\" remained after cleanup", testRootDir)
 	}
 }
@@ -79,6 +79,9 @@ func TestInitTempChdir(t *testing.T) {
 
 	// Check that we are in an empty directory
 	files, err := ioutil.ReadDir(".")
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(files) > 0 {
 		t.Fatalf("The current, supposedly new, directory \"%s\" is not empty\n", tempWD)
 	}
@@ -96,6 +99,7 @@ func TestInitTempChdir(t *testing.T) {
 		t.Fatalf("Expected to return to the \"%s\" directory after the cleanup. Instead we are in \"%s\"\n", origWD, currWD)
 	}
 }
+
 func TestInitTempDirRestrictedPermissions(t *testing.T) {
 
 	root, cleanup, err := InitTempDir()
@@ -182,5 +186,51 @@ func TestCloneTempDir(t *testing.T) {
 	_, ok := err.(*os.PathError)
 	if !ok {
 		t.Fatalf("Cloned directory \"%s\" remained after cleanup", testRootDir)
+	}
+}
+
+func TestCloneTempChdir(t *testing.T) {
+
+	// Capture the old workdir
+	origWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Get the values and create the test root dir to be tested
+	src := "./temp_dir_mocks"
+
+	// Get the values and clone the test root dir to be tested
+	old, cleanup, err := CloneTempChdir(src)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if origWD != old {
+		t.Fatalf("Got \"%s\" as an old directory instead of the expected \"%s\"\n", old, origWD)
+	}
+
+	// Capture the temporary workdir
+	tempWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	src = filepath.Join(origWD, src)
+	if diffs := TreeDiff(src, tempWD, ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t)); diffs != nil {
+		t.Errorf("Trees at \"%s\" and \"%s\" differ unexpectedly: %v", src, tempWD, diffs)
+	}
+
+	// run the resulting cleaup function for tests below
+	cleanup()
+
+	// Check that we returned into the original directory after the cleanup
+	currWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if currWD != origWD {
+		t.Fatalf("Expected to return to the \"%s\" directory after the cleanup. Instead we are in \"%s\"\n", origWD, currWD)
 	}
 }

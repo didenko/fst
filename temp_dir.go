@@ -16,6 +16,15 @@ var noop = func() {}
 // temporary files according to platform preferences and
 // returns the directory name and a cleanup function.
 //
+// The returned values are:
+//
+// 1. a string containing the created temporary directory path
+//
+// 2. a cleanup function to change back to the old working
+//    directory and to delete the temporary directory
+//
+// 3. an error
+//
 // If there was an error while creating the temporary
 // directory, then the returned directory name is empty,
 // cleanup funcion is a noop, and the temp folder is
@@ -69,9 +78,9 @@ func InitTempDir() (string, func(), error) {
 // 1. a string containing the previous working directory
 //
 // 2. a cleanup function to change back to the old working
-//    directory and to delete the meporary directory
+//    directory and to delete the temporary directory
 //
-// 3. an error holder.
+// 3. an error
 func InitTempChdir() (string, func(), error) {
 	root, cleanup, err := InitTempDir()
 	if err != nil {
@@ -92,16 +101,24 @@ func InitTempChdir() (string, func(), error) {
 
 	return wd,
 		func() {
-			cleanup()
 			os.Chdir(wd)
+			cleanup()
 		},
 		nil
 }
 
 // CloneTempDir function creates a copy of an existing
 // directory with it's content - regular files only - for
-// holding temporary test files. It returns the directory
-// name and a cleanup function.
+// holding temporary test files.
+//
+// The returned values are:
+//
+// 1. a string containing the created temporary directory path
+//
+// 2. a cleanup function to change back to the old working
+//    directory and to delete the temporary directory
+//
+// 3. an error
 //
 // If there was an error while cloning the temporary
 // directory, then the returned directory name is empty,
@@ -126,4 +143,42 @@ func CloneTempDir(src string) (string, func(), error) {
 	}
 
 	return root, cleanup, nil
+}
+
+// CloneTempChdir clones a temporary directory in the same
+// fashion as CloneTempDir. It also changes into the newly
+// cloned temporary directory and adds returning back
+// to the old working directory to the returned cleanup
+// function. The returned values are:
+//
+// 1. a string containing the previous working directory
+//
+// 2. a cleanup function to change back to the old working
+//    directory and to delete the temporary directory
+//
+// 3. an error
+func CloneTempChdir(src string) (string, func(), error) {
+	root, cleanup, err := CloneTempDir(src)
+	if err != nil {
+		return "", noop, err
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		cleanup()
+		return "", noop, err
+	}
+
+	err = os.Chdir(root)
+	if err != nil {
+		cleanup()
+		return "", noop, err
+	}
+
+	return wd,
+		func() {
+			os.Chdir(wd)
+			cleanup()
+		},
+		nil
 }
