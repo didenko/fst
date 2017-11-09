@@ -29,12 +29,17 @@ func ExampleTreeCreate() {
 	}
 	defer cleanup()
 
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Chdir(wd)
+
 	err = os.Chdir(root)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	wd, _ := os.Getwd()
 	log.Printf("Temp folder: %v\n", wd)
 
 	dirs := `
@@ -146,9 +151,7 @@ func TestTreeCreate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func(dir string) {
-		os.Chdir(dir)
-	}(wd)
+	defer os.Chdir(wd)
 
 	err = os.Chdir(root)
 	if err != nil {
