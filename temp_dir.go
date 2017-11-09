@@ -21,7 +21,7 @@ var noop = func() {}
 // 1. a string containing the created temporary directory path
 //
 // 2. a cleanup function to change back to the old working
-//    directory and to delete the temporary directory
+// directory and to delete the temporary directory
 //
 // 3. an error
 //
@@ -78,7 +78,7 @@ func InitTempDir() (string, func(), error) {
 // 1. a string containing the previous working directory
 //
 // 2. a cleanup function to change back to the old working
-//    directory and to delete the temporary directory
+// directory and to delete the temporary directory
 //
 // 3. an error
 func InitTempChdir() (string, func(), error) {
@@ -116,7 +116,7 @@ func InitTempChdir() (string, func(), error) {
 // 1. a string containing the created temporary directory path
 //
 // 2. a cleanup function to change back to the old working
-//    directory and to delete the temporary directory
+// directory and to delete the temporary directory
 //
 // 3. an error
 //
@@ -154,7 +154,7 @@ func CloneTempDir(src string) (string, func(), error) {
 // 1. a string containing the previous working directory
 //
 // 2. a cleanup function to change back to the old working
-//    directory and to delete the temporary directory
+// directory and to delete the temporary directory
 //
 // 3. an error
 func CloneTempChdir(src string) (string, func(), error) {
