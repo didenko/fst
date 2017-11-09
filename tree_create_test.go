@@ -23,24 +23,11 @@ func ExampleTreeCreate() {
 		return ""
 	}
 
-	root, cleanup, err := InitTempDir()
+	_, cleanup, err := InitTempChdir()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cleanup()
-
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.Chdir(wd)
-
-	err = os.Chdir(root)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Temp folder: %v\n", wd)
 
 	dirs := `
 		2001-01-01T01:01:01Z	0750	a/
@@ -141,22 +128,11 @@ func TestTreeCreate(t *testing.T) {
 		{time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "aaa/bbb", ""},
 	}
 
-	root, cleanup, err := InitTempDir()
+	_, cleanup, err := InitTempChdir()
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cleanup()
-
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(wd)
-
-	err = os.Chdir(root)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	reader := strings.NewReader(dirs)
 	err = TreeCreate(reader)

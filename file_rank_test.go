@@ -5,28 +5,17 @@ package fstest // import "go.didenko.com/fstest"
 
 import (
 	"log"
-	"os"
 	"strings"
 	"testing"
 )
 
 func TestByContent(t *testing.T) {
-	root, cleanup, err := InitTempDir()
+
+	_, cleanup, err := InitTempChdir()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cleanup()
-
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.Chdir(wd)
-
-	err = os.Chdir(root)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	files := `
 		2017-11-08T23:11:17Z	0700	1_same_a	a 1 b 2 c 3 d 4\n
