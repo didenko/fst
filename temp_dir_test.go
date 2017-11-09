@@ -53,6 +53,49 @@ func TestInitTempDir(t *testing.T) {
 	}
 }
 
+func TestInitTempChdir(t *testing.T) {
+
+	// Capture the old workdir
+	origWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Get the values and create the test root dir to be tested
+	old, cleanup, err := InitTempChdir()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if origWD != old {
+		t.Fatalf("Got \"%s\" as an old directory instead of the expected \"%s\"\n", old, origWD)
+	}
+
+	// Capture the temporary workdir
+	tempWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Check that we are in an empty directory
+	files, err := ioutil.ReadDir(".")
+	if len(files) > 0 {
+		t.Fatalf("The current, supposedly new, directory \"%s\" is not empty\n", tempWD)
+	}
+
+	// run the resulting cleaup function for tests below
+	cleanup()
+
+	// Check that we returned into the original directory after the cleanup
+	currWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if currWD != origWD {
+		t.Fatalf("Expected to return to the \"%s\" directory after the cleanup. Instead we are in \"%s\"\n", origWD, currWD)
+	}
+}
 func TestInitTempDirRestrictedPermissions(t *testing.T) {
 
 	root, cleanup, err := InitTempDir()
@@ -127,8 +170,7 @@ func TestCloneTempDir(t *testing.T) {
 		t.Errorf("Returned temporary path \"%s\" is not a directory", testRootDir)
 	}
 
-	if diffs := TreeDiff(src, testRootDir, ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t));
-	diffs != nil {
+	if diffs := TreeDiff(src, testRootDir, ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t)); diffs != nil {
 		t.Errorf("Trees at \"%s\" and \"%s\" differ unexpectedly: %v", src, testRootDir, diffs)
 	}
 

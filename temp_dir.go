@@ -60,6 +60,44 @@ func InitTempDir() (string, func(), error) {
 	}, nil
 }
 
+// InitTempChdir creates a temporary directory in the same
+// fashion as InitTempDir. It also changes into the newly
+// created temporary directory and adds returning back
+// to the old working directory to the returned cleanup
+// function. The returned values are:
+//
+// 1. a string containing the previous working directory
+//
+// 2. a cleanup function to change back to the old working
+//    directory and to delete the meporary directory
+//
+// 3. an error holder.
+func InitTempChdir() (string, func(), error) {
+	root, cleanup, err := InitTempDir()
+	if err != nil {
+		return "", noop, err
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		cleanup()
+		return "", noop, err
+	}
+
+	err = os.Chdir(root)
+	if err != nil {
+		cleanup()
+		return "", noop, err
+	}
+
+	return wd,
+		func() {
+			cleanup()
+			os.Chdir(wd)
+		},
+		nil
+}
+
 // CloneTempDir function creates a copy of an existing
 // directory with it's content - regular files only - for
 // holding temporary test files. It returns the directory
@@ -81,7 +119,7 @@ func CloneTempDir(src string) (string, func(), error) {
 		return "", noop, err
 	}
 
-	err = copyTree(src, root)
+	err = TreeCopy(src, root)
 	if err != nil {
 		cleanup()
 		return "", noop, err
