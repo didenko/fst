@@ -35,8 +35,9 @@ func TestTreeDiff(t *testing.T) {
 
 	successes := []DiffCase{
 		DiffCase{"a_same_content", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"d_same_empty", []FileRank{ByName}},
-		DiffCase{"e_same_empty_subdir", []FileRank{ByName}},
+		DiffCase{"d_same_empty", []FileRank{ByName, BySize}},
+		DiffCase{"e_same_empty_subdir", []FileRank{ByName, BySize}},
+		DiffCase{"k_same_size", []FileRank{ByName, BySize}},
 	}
 
 	fails := []DiffCase{
@@ -50,6 +51,7 @@ func TestTreeDiff(t *testing.T) {
 		DiffCase{"g_empty_right", []FileRank{ByName}},
 		DiffCase{"h_diff_content_bin", []FileRank{ByName, ByContent(t)}},
 		DiffCase{"i_diff_content_text_eol", []FileRank{ByName, ByContent(t)}},
+		DiffCase{"j_diff_sizes", []FileRank{ByName, BySize}},
 	}
 
 	for _, tc := range successes {
