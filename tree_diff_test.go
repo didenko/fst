@@ -2,7 +2,10 @@
 // See the included LICENSE.md file for licensing information
 
 package fstest // import "go.didenko.com/fstest"
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+)
 
 func TestTreeDiff(t *testing.T) {
 
@@ -12,11 +15,26 @@ func TestTreeDiff(t *testing.T) {
 	}
 	defer cleanup()
 
-	if diffs := TreeDiff("a_same/left", "a_same/right", ByName, ByDir, BySize, ByContent(t)); diffs != nil {
-		t.Errorf("Equivalent directories in \"a_same\" tested as different: %v\n", diffs)
+	successes := []string{"a_same"}
+	fails := []string{"b_left_nodir", "b_right_nodir"}
+
+	for _, caseDir := range successes {
+		if diffs := TreeDiff(
+			filepath.Join(caseDir, "left"),
+			filepath.Join(caseDir, "right"),
+			ByName, ByDir, BySize, ByContent(t),
+		); diffs != nil {
+			t.Errorf("Equivalent directories in \"%s\" tested as different: %v\n", caseDir, diffs)
+		}
 	}
 
-	if diffs := TreeDiff("ba_left_nodir/left", "ba_left_nodir/right", ByName, ByDir, BySize, ByContent(t)); diffs == nil {
-		t.Error("Differing directories in \"ba_left_nodir\" tested as equivalent\n")
+	for _, caseDir := range fails {
+		if diffs := TreeDiff(
+			filepath.Join(caseDir, "left"),
+			filepath.Join(caseDir, "right"),
+			ByName, ByDir, BySize, ByContent(t),
+		); diffs == nil {
+			t.Errorf("Differing directories in \"%s\" passed as equivalent\n", caseDir)
+		}
 	}
 }
