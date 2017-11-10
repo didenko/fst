@@ -16,7 +16,10 @@ func TestTreeDiff(t *testing.T) {
 	defer cleanup()
 
 	successes := []string{"a_same"}
-	fails := []string{"b_left_nodir", "b_right_nodir"}
+	fails := []string{
+		"b_left_nodir", "b_right_nodir",
+		"c_left_nofile", "c_right_nofile",
+	}
 
 	for _, caseDir := range successes {
 		if diffs := TreeDiff(
