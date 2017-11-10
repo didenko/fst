@@ -29,7 +29,7 @@ func TestTreeDiff(t *testing.T) {
 	})
 
 	successes := []string{
-		"a_same",
+		"a_same_content",
 		"d_same_empty",
 		"e_same_empty_subdir",
 	}
@@ -39,7 +39,8 @@ func TestTreeDiff(t *testing.T) {
 		"c_left_nofile", "c_right_nofile",
 		"f_dir_left_file_right", "f_dir_right_file_left",
 		"g_empty_left", "g_empty_right",
-		"h_diff_content_bin", "i_diff_content_text_eol",
+		"h_diff_content_bin",
+		"i_diff_content_text_eol",
 	}
 
 	for _, caseDir := range successes {
