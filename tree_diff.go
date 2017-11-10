@@ -15,8 +15,7 @@ import (
 // compared in the tree. Specific comparisons are determined
 // By the variadic slice of FileRank functions, like the
 // ones in this package. A commonly used set of comparators
-// is ByName, ByDir, BySize.
-// TODO: , and ByContent
+// is ByName, ByDir, BySize, and ByContent
 func TreeDiff(a string, b string, comps ...FileRank) []string {
 	var diags []string
 
@@ -50,6 +49,9 @@ func TreeDiff(a string, b string, comps ...FileRank) []string {
 	return diags
 }
 
+// collectDifferent forms file infomation slices for files
+// unique to either left or right collections. It is based
+// on a modified algorithm from the go.didenko.com/slops package
 func collectDifferent(left, right []*FileInfoPath, comps ...FileRank) (onlyLeft, onlyRight []*FileInfoPath) {
 
 	onlyLeft = make([]*FileInfoPath, 0)
@@ -68,8 +70,6 @@ func collectDifferent(left, right []*FileInfoPath, comps ...FileRank) (onlyLeft,
 			l++
 			continue
 		}
-
-		// FIXME: Filenames same, compare content
 
 		l++
 		r++
