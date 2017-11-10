@@ -28,38 +28,47 @@ func TestTreeDiff(t *testing.T) {
 		return nil
 	})
 
-	successes := []string{
-		"a_same_content",
-		"d_same_empty",
-		"e_same_empty_subdir",
+	type DiffCase struct {
+		dir   string
+		comps []FileRank
 	}
 
-	fails := []string{
-		"b_left_nodir", "b_right_nodir",
-		"c_left_nofile", "c_right_nofile",
-		"f_dir_left_file_right", "f_dir_right_file_left",
-		"g_empty_left", "g_empty_right",
-		"h_diff_content_bin",
-		"i_diff_content_text_eol",
+	successes := []DiffCase{
+		DiffCase{"a_same_content", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"d_same_empty", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"e_same_empty_subdir", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
 	}
 
-	for _, caseDir := range successes {
+	fails := []DiffCase{
+		DiffCase{"b_left_nodir", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"b_right_nodir", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"c_left_nofile", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"c_right_nofile", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"f_dir_left_file_right", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"f_dir_right_file_left", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"g_empty_left", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"g_empty_right", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"h_diff_content_bin", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"i_diff_content_text_eol", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+	}
+
+	for _, tc := range successes {
 		if diffs := TreeDiff(
-			filepath.Join(caseDir, "left"),
-			filepath.Join(caseDir, "right"),
-			ByName, ByDir, BySize, ByContent(t),
+			filepath.Join(tc.dir, "left"),
+			filepath.Join(tc.dir, "right"),
+			tc.comps...,
 		); diffs != nil {
-			t.Errorf("Equivalent directories in \"%s\" tested as different: %v\n", caseDir, diffs)
+			t.Errorf("Equivalent directories in \"%s\" tested as different: %v\n", tc.dir, diffs)
 		}
 	}
 
-	for _, caseDir := range fails {
+	for _, tc := range fails {
 		if diffs := TreeDiff(
-			filepath.Join(caseDir, "left"),
-			filepath.Join(caseDir, "right"),
-			ByName, ByDir, BySize, ByContent(t),
+			filepath.Join(tc.dir, "left"),
+			filepath.Join(tc.dir, "right"),
+			tc.comps...,
 		); diffs == nil {
-			t.Errorf("Differing directories in \"%s\" passed as equivalent\n", caseDir)
+			t.Errorf("Differing directories in \"%s\" passed as equivalent\n", tc.dir)
 		}
 	}
 }
