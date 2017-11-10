@@ -35,21 +35,21 @@ func TestTreeDiff(t *testing.T) {
 
 	successes := []DiffCase{
 		DiffCase{"a_same_content", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"d_same_empty", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"e_same_empty_subdir", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"d_same_empty", []FileRank{ByName}},
+		DiffCase{"e_same_empty_subdir", []FileRank{ByName}},
 	}
 
 	fails := []DiffCase{
-		DiffCase{"b_left_nodir", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"b_right_nodir", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"c_left_nofile", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"c_right_nofile", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"f_dir_left_file_right", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"f_dir_right_file_left", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"g_empty_left", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"g_empty_right", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"h_diff_content_bin", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"i_diff_content_text_eol", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		DiffCase{"b_left_nodir", []FileRank{ByName}},
+		DiffCase{"b_right_nodir", []FileRank{ByName}},
+		DiffCase{"c_left_nofile", []FileRank{ByName}},
+		DiffCase{"c_right_nofile", []FileRank{ByName}},
+		DiffCase{"f_dir_left_file_right", []FileRank{ByName, ByDir}},
+		DiffCase{"f_dir_right_file_left", []FileRank{ByName, ByDir}},
+		DiffCase{"g_empty_left", []FileRank{ByName}},
+		DiffCase{"g_empty_right", []FileRank{ByName}},
+		DiffCase{"h_diff_content_bin", []FileRank{ByName, ByContent(t)}},
+		DiffCase{"i_diff_content_text_eol", []FileRank{ByName, ByContent(t)}},
 	}
 
 	for _, tc := range successes {
