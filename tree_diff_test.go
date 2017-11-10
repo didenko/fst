@@ -3,6 +3,7 @@
 
 package fstest // import "go.didenko.com/fstest"
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -15,10 +16,30 @@ func TestTreeDiff(t *testing.T) {
 	}
 	defer cleanup()
 
-	successes := []string{"a_same"}
+	err = filepath.Walk(".", func(p string, i os.FileInfo, err error) error {
+		if err != nil {
+			t.Fatal(err)
+		}
+		if filepath.Base(p) == "delete.me" {
+			if os.Remove(p) != nil {
+				t.Fatal(err)
+			}
+		}
+		return nil
+	})
+
+	successes := []string{
+		"a_same",
+		"d_same_empty",
+		"e_same_empty_subdir",
+	}
+
 	fails := []string{
 		"b_left_nodir", "b_right_nodir",
 		"c_left_nofile", "c_right_nofile",
+		"f_dir_left_file_right", "f_dir_right_file_left",
+		"g_empty_left", "g_empty_right",
+		"h_diff_content_bin", "i_diff_content_text_eol",
 	}
 
 	for _, caseDir := range successes {
