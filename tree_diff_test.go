@@ -59,8 +59,8 @@ func TestTreeDiff(t *testing.T) {
 
 	for _, tc := range successes {
 		if diffs := TreeDiff(
-			filepath.Join(tc.dir, "left"),
-			filepath.Join(tc.dir, "right"),
+			filepath.Join(tc.dir, "a"),
+			filepath.Join(tc.dir, "b"),
 			tc.comps...,
 		); diffs != nil {
 			t.Errorf("Equivalent directories in \"%s\" tested as different: %v\n", tc.dir, diffs)
@@ -69,8 +69,8 @@ func TestTreeDiff(t *testing.T) {
 
 	for _, tc := range fails {
 		if diffs := TreeDiff(
-			filepath.Join(tc.dir, "left"),
-			filepath.Join(tc.dir, "right"),
+			filepath.Join(tc.dir, "a"),
+			filepath.Join(tc.dir, "b"),
 			tc.comps...,
 		); diffs == nil {
 			t.Errorf("Differing directories in \"%s\" passed as equivalent\n", tc.dir)
