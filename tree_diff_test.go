@@ -8,6 +8,11 @@ import (
 	"testing"
 )
 
+type DiffCase struct {
+	dir   string
+	comps []FileRank
+}
+
 func TestTreeDiff(t *testing.T) {
 
 	_, cleanup, err := CloneTempChdir("tree_diff_mocks")
@@ -27,11 +32,6 @@ func TestTreeDiff(t *testing.T) {
 		}
 		return nil
 	})
-
-	type DiffCase struct {
-		dir   string
-		comps []FileRank
-	}
 
 	successes := []DiffCase{
 		DiffCase{"a_same_content", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
@@ -75,5 +75,55 @@ func TestTreeDiff(t *testing.T) {
 		); diffs == nil {
 			t.Errorf("Differing directories in \"%s\" passed as equivalent\n", tc.dir)
 		}
+	}
+}
+
+// Time comparisons are tested separately because Git doe not
+// preserve timestamps - meaning it is impossible to enforce
+// timestamps of checked out files and directories without
+// jumping through extra hoops (possibly, git hooks would do)
+//
+// Here it is simpler to use TreeCreate function which sets
+// timestamps correctly instead of fighting git.
+func TestTreeDiffTimes(t *testing.T) {
+
+	mocks, err := os.Open("tree_diff_time_mocks")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, cleanup, err := InitTempChdir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cleanup()
+
+	err = TreeCreate(mocks)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diffs := TreeDiff(
+		"a_same_times/a",
+		"a_same_times/b",
+		ByName, ByTime,
+	); diffs != nil {
+		t.Errorf("Equivalent directories in \"%s\" tested as different: %v\n", "a_same_times", diffs)
+	}
+
+	if diffs := TreeDiff(
+		"b_diff_time_file/a",
+		"b_diff_time_file/b",
+		ByName, ByTime,
+	); diffs == nil {
+		t.Errorf("Differing directories in \"%s\" passed as equivalent\n", "b_diff_time_file")
+	}
+
+	if diffs := TreeDiff(
+		"c_diff_time_dir/a",
+		"c_diff_time_dir/b",
+		ByName, ByTime,
+	); diffs == nil {
+		t.Errorf("Differing directories in \"%s\" passed as equivalent\n", "c_diff_time_dir")
 	}
 }

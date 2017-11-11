@@ -1,0 +1,30 @@
+
+2001-01-01T01:01:01Z	0500	a_same_times/
+
+2001-02-01T01:01:01Z	0500	a_same_times/a/
+2001-03-01T01:01:01Z	0500	a_same_times/a/old	1234
+2001-04-01T01:01:01Z	0500	a_same_times/a/young/
+
+2001-02-01T01:01:01Z	0500	a_same_times/b/
+2001-03-01T01:01:01Z	0500	a_same_times/b/old/
+2001-04-01T01:01:01Z	0500	a_same_times/b/young	1234
+
+2001-01-01T01:01:01Z	0500	b_diff_time_file/
+
+2001-02-01T01:01:01Z	0500	b_diff_time_file/a/
+2001-03-01T01:01:01Z	0500	b_diff_time_file/a/old	1234
+2001-04-01T01:01:01Z	0500	b_diff_time_file/a/young/
+
+2001-02-01T01:01:01Z	0500	b_diff_time_file/b/
+2001-03-02T01:01:01Z	0500	b_diff_time_file/b/old	1234
+2001-04-01T01:01:01Z	0500	b_diff_time_file/b/young/
+
+2001-01-01T01:01:01Z	0500	c_diff_time_dir/
+
+2001-02-01T01:01:01Z	0500	c_diff_time_dir/a/
+2001-03-01T01:01:01Z	0500	c_diff_time_dir/a/old	1234
+2001-04-01T01:01:01Z	0500	c_diff_time_dir/a/young/
+
+2001-02-01T01:01:01Z	0500	c_diff_time_dir/b/
+2001-03-01T01:01:01Z	0500	c_diff_time_dir/b/old	1234
+2001-04-02T01:01:01Z	0500	c_diff_time_dir/b/young/
