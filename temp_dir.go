@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 )
 
-var noop = func() {}
-
 // InitTempDir function creates a directory for holding
 // temporary files according to platform preferences and
 // returns the directory name and a cleanup function.
@@ -27,13 +25,13 @@ var noop = func() {}
 //
 // If there was an error while creating the temporary
 // directory, then the returned directory name is empty,
-// cleanup funcion is a noop, and the temp folder is
+// cleanup funcion is nil, and the temp folder is
 // expected to be already removed.
 func InitTempDir() (string, func(), error) {
 	root, err := ioutil.TempDir("", "")
 	if err != nil {
 		os.RemoveAll(root)
-		return "", noop, err
+		return "", nil, err
 	}
 
 	return root, func() {
@@ -84,19 +82,19 @@ func InitTempDir() (string, func(), error) {
 func InitTempChdir() (string, func(), error) {
 	root, cleanup, err := InitTempDir()
 	if err != nil {
-		return "", noop, err
+		return "", nil, err
 	}
 
 	wd, err := os.Getwd()
 	if err != nil {
 		cleanup()
-		return "", noop, err
+		return "", nil, err
 	}
 
 	err = os.Chdir(root)
 	if err != nil {
 		cleanup()
-		return "", noop, err
+		return "", nil, err
 	}
 
 	return wd,
@@ -122,7 +120,7 @@ func InitTempChdir() (string, func(), error) {
 //
 // If there was an error while cloning the temporary
 // directory, then the returned directory name is empty,
-// cleanup funcion is a noop, and the temp folder is
+// cleanup funcion is nil, and the temp folder is
 // expected to be already removed.
 //
 // The clone attempts to maintain the basic original Unix
@@ -133,13 +131,13 @@ func InitTempChdir() (string, func(), error) {
 func CloneTempDir(src string) (string, func(), error) {
 	root, cleanup, err := InitTempDir()
 	if err != nil {
-		return "", noop, err
+		return "", nil, err
 	}
 
 	err = TreeCopy(src, root)
 	if err != nil {
 		cleanup()
-		return "", noop, err
+		return "", nil, err
 	}
 
 	return root, cleanup, nil
@@ -160,19 +158,19 @@ func CloneTempDir(src string) (string, func(), error) {
 func CloneTempChdir(src string) (string, func(), error) {
 	root, cleanup, err := CloneTempDir(src)
 	if err != nil {
-		return "", noop, err
+		return "", nil, err
 	}
 
 	wd, err := os.Getwd()
 	if err != nil {
 		cleanup()
-		return "", noop, err
+		return "", nil, err
 	}
 
 	err = os.Chdir(root)
 	if err != nil {
 		cleanup()
-		return "", noop, err
+		return "", nil, err
 	}
 
 	return wd,
