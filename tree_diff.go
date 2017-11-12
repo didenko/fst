@@ -16,20 +16,21 @@ import (
 // By the variadic slice of FileRank functions, like the
 // ones in this package. A commonly used set of comparators
 // is ByName, ByDir, BySize, and ByContent
-func TreeDiff(a string, b string, comps ...FileRank) []string {
-	var diags []string
+func TreeDiff(a string, b string, comps ...FileRank) ([]string, error) {
 
 	listA, err := collectFileInfo(a)
 	if err != nil {
-		return []string{fmt.Sprintf("Failed to collect entries from \"%s\" with error %v\n", a, err)}
+		return nil, err
 	}
 
 	listB, err := collectFileInfo(b)
 	if err != nil {
-		return []string{fmt.Sprintf("Failed to collect entries from \"%s\" with error %v\n", b, err)}
+		return nil, err
 	}
 
 	onlyA, onlyB := collectDifferent(listA, listB, comps...)
+
+	var diags []string
 
 	if len(onlyA) > 0 {
 		diagA := fmt.Sprintf("Unique items from \"%s\": \n", a)
@@ -46,7 +47,7 @@ func TreeDiff(a string, b string, comps ...FileRank) []string {
 		diags = append(diags, diagB)
 	}
 
-	return diags
+	return diags, nil
 }
 
 // collectDifferent forms file infomation slices for files

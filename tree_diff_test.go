@@ -58,21 +58,25 @@ func TestTreeDiff(t *testing.T) {
 	}
 
 	for _, tc := range successes {
-		if diffs := TreeDiff(
-			filepath.Join(tc.dir, "a"),
-			filepath.Join(tc.dir, "b"),
-			tc.comps...,
-		); diffs != nil {
+
+		diffs, err := TreeDiff(filepath.Join(tc.dir, "a"), filepath.Join(tc.dir, "b"), tc.comps...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if diffs != nil {
 			t.Errorf("Equivalent directories in \"%s\" tested as different: %v\n", tc.dir, diffs)
 		}
 	}
 
 	for _, tc := range fails {
-		if diffs := TreeDiff(
-			filepath.Join(tc.dir, "a"),
-			filepath.Join(tc.dir, "b"),
-			tc.comps...,
-		); diffs == nil {
+
+		diffs, err := TreeDiff(filepath.Join(tc.dir, "a"), filepath.Join(tc.dir, "b"), tc.comps...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if diffs == nil {
 			t.Errorf("Differing directories in \"%s\" passed as equivalent\n", tc.dir)
 		}
 	}
@@ -103,27 +107,30 @@ func TestTreeDiffTimes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diffs := TreeDiff(
-		"a_same_times/a",
-		"a_same_times/b",
-		ByName, ByTime,
-	); diffs != nil {
+	diffs, err := TreeDiff("a_same_times/a", "a_same_times/b", ByName, ByTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diffs != nil {
 		t.Errorf("Equivalent directories in \"%s\" tested as different: %v\n", "a_same_times", diffs)
 	}
 
-	if diffs := TreeDiff(
-		"b_diff_time_file/a",
-		"b_diff_time_file/b",
-		ByName, ByTime,
-	); diffs == nil {
+	diffs, err = TreeDiff("b_diff_time_file/a", "b_diff_time_file/b", ByName, ByTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diffs == nil {
 		t.Errorf("Differing directories in \"%s\" passed as equivalent\n", "b_diff_time_file")
 	}
 
-	if diffs := TreeDiff(
-		"c_diff_time_dir/a",
-		"c_diff_time_dir/b",
-		ByName, ByTime,
-	); diffs == nil {
+	diffs, err = TreeDiff("c_diff_time_dir/a", "c_diff_time_dir/b", ByName, ByTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diffs == nil {
 		t.Errorf("Differing directories in \"%s\" passed as equivalent\n", "c_diff_time_dir")
 	}
 }

@@ -41,7 +41,12 @@ func TestTreeCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diffs := TreeDiff("src", "dst", ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t)); diffs != nil {
+	diffs, err := TreeDiff("src", "dst", ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if diffs != nil {
 		t.Errorf("Trees at \"%s\" and \"%s\" differ unexpectedly: %v", "src", "dst", diffs)
 	}
 }
