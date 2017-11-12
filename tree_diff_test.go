@@ -2,6 +2,7 @@
 // See the included LICENSE.md file for licensing information
 
 package fst // import "go.didenko.com/fst"
+
 import (
 	"os"
 	"path/filepath"
@@ -33,28 +34,32 @@ func TestTreeDiff(t *testing.T) {
 		return nil
 	})
 
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	successes := []DiffCase{
-		DiffCase{"a_same_content", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
-		DiffCase{"d_same_empty", []FileRank{ByName, BySize}},
-		DiffCase{"e_same_empty_subdir", []FileRank{ByName, BySize}},
-		DiffCase{"k_same_size", []FileRank{ByName, BySize}},
-		DiffCase{"j_diff_sizes_same_perm", []FileRank{ByName, ByPerm}},
-		DiffCase{"l_perms_same", []FileRank{ByName, ByPerm}},
+		{"a_same_content", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
+		{"d_same_empty", []FileRank{ByName, BySize}},
+		{"e_same_empty_subdir", []FileRank{ByName, BySize}},
+		{"k_same_size", []FileRank{ByName, BySize}},
+		{"j_diff_sizes_same_perm", []FileRank{ByName, ByPerm}},
+		{"l_perms_same", []FileRank{ByName, ByPerm}},
 	}
 
 	fails := []DiffCase{
-		DiffCase{"b_left_nodir", []FileRank{ByName}},
-		DiffCase{"b_right_nodir", []FileRank{ByName}},
-		DiffCase{"c_left_nofile", []FileRank{ByName}},
-		DiffCase{"c_right_nofile", []FileRank{ByName}},
-		DiffCase{"f_dir_left_file_right", []FileRank{ByName, ByDir}},
-		DiffCase{"f_dir_right_file_left", []FileRank{ByName, ByDir}},
-		DiffCase{"g_empty_left", []FileRank{ByName}},
-		DiffCase{"g_empty_right", []FileRank{ByName}},
-		DiffCase{"h_diff_content_bin", []FileRank{ByName, ByContent(t)}},
-		DiffCase{"i_diff_content_text_eol", []FileRank{ByName, ByContent(t)}},
-		DiffCase{"j_diff_sizes_same_perm", []FileRank{ByName, BySize}},
-		DiffCase{"l_perms_same", []FileRank{ByName, ByPerm, BySize}},
+		{"b_left_nodir", []FileRank{ByName}},
+		{"b_right_nodir", []FileRank{ByName}},
+		{"c_left_nofile", []FileRank{ByName}},
+		{"c_right_nofile", []FileRank{ByName}},
+		{"f_dir_left_file_right", []FileRank{ByName, ByDir}},
+		{"f_dir_right_file_left", []FileRank{ByName, ByDir}},
+		{"g_empty_left", []FileRank{ByName}},
+		{"g_empty_right", []FileRank{ByName}},
+		{"h_diff_content_bin", []FileRank{ByName, ByContent(t)}},
+		{"i_diff_content_text_eol", []FileRank{ByName, ByContent(t)}},
+		{"j_diff_sizes_same_perm", []FileRank{ByName, BySize}},
+		{"l_perms_same", []FileRank{ByName, ByPerm, BySize}},
 	}
 
 	for _, tc := range successes {
