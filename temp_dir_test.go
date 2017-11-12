@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -244,4 +245,59 @@ func TestTempCloneChdir(t *testing.T) {
 	if currWD != origWD {
 		t.Fatalf("Expected to return to the \"%s\" directory after the cleanup. Instead we are in \"%s\"\n", origWD, currWD)
 	}
+}
+
+func ExampleTempCreateChdir() {
+
+	dirMark := func(fi os.FileInfo) string {
+		if fi.IsDir() {
+			return "/"
+		}
+		return ""
+	}
+
+	dirs := `
+			2001-01-01T01:01:01Z	0750	a/
+			2001-01-01T01:01:01Z	0750	b/
+			2001-01-01T01:01:01Z	0700	c.txt	"This is a two line\nfile with\ta tab\n"
+			2001-01-01T01:01:01Z	0700	d.txt	No need to quote a single line without tabs
+
+			2002-01-01T01:01:01Z	0700	"has\ttab/"
+			2002-01-01T01:01:01Z	0700	"has\ttab/e.mb"	"# Markdown...\n\n... also ***possible***\n"
+
+			2002-01-01T01:01:01Z	0700	"\u263asmiles\u263a/"
+		`
+
+	reader := strings.NewReader(dirs)
+	_, cleanup, err := TempCreateChdir(reader)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cleanup()
+
+	files, err := ioutil.ReadDir(".")
+	if err != nil {
+		log.Printf("%v\n", err)
+		return
+	}
+
+	fmt.Printf(
+		"%v | %v | %s%s\n",
+		files[1].ModTime().UTC(),
+		files[1].Mode().Perm(),
+		files[1].Name(),
+		dirMark(files[1]),
+	)
+
+	fmt.Printf(
+		"%v | %v | %s%s\n",
+		files[2].ModTime().UTC(),
+		files[2].Mode().Perm(),
+		files[2].Name(),
+		dirMark(files[2]),
+	)
+
+	// Output:
+	// 2001-01-01 01:01:01 +0000 UTC | -rwxr-x--- | b/
+	// 2001-01-01 01:01:01 +0000 UTC | -rwx------ | c.txt
 }

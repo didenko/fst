@@ -81,8 +81,8 @@ func TestTreeDiff(t *testing.T) {
 // timestamps of checked out files and directories without
 // jumping through extra hoops (possibly, git hooks would do)
 //
-// Here it is simpler to use TreeCreate function which sets
-// timestamps correctly instead of fighting git.
+// Here it is simpler to use the TempCreateChdir function which
+// sets timestamps correctly instead of fighting git.
 func TestTreeDiffTimes(t *testing.T) {
 
 	mocks, err := os.Open("tree_diff_time_mocks")
@@ -90,16 +90,11 @@ func TestTreeDiffTimes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, cleanup, err := TempInitChdir()
+	_, cleanup, err := TempCreateChdir(mocks)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer cleanup()
-
-	err = TreeCreate(mocks)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	diffs, err := TreeDiff("a_same_times/a", "a_same_times/b", ByName, ByTime)
 	if err != nil {

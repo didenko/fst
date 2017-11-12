@@ -8,11 +8,6 @@ import "testing"
 import "strings"
 
 func TestTreeCopy(t *testing.T) {
-	_, cleanup, err := TempInitChdir()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer cleanup()
 
 	tree := `
 		2001-01-01T01:01:01Z	0700	src/
@@ -28,13 +23,13 @@ func TestTreeCopy(t *testing.T) {
 		2002-01-01T01:01:01Z	0700	"src/\u10077heavy quoted\u10078/"
 
 		2001-01-01T01:01:01Z	0700	dst/
-		`
-
+	`
 	treeReader := strings.NewReader(tree)
-	err = TreeCreate(treeReader)
+	_, cleanup, err := TempCreateChdir(treeReader)
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer cleanup()
 
 	err = TreeCopy("src", "dst")
 	if err != nil {

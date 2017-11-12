@@ -4,18 +4,11 @@
 package fst // import "go.didenko.com/fst"
 
 import (
-	"log"
 	"strings"
 	"testing"
 )
 
 func TestByContent(t *testing.T) {
-
-	_, cleanup, err := TempInitChdir()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cleanup()
 
 	files := `
 		2017-11-08T23:11:17Z	0700	1_same_a	a 1 b 2 c 3 d 4\n
@@ -30,12 +23,12 @@ func TestByContent(t *testing.T) {
 		2017-11-08T23:11:17Z	0700	4_length_a	a 1 b 2 c 3 d 4\n
 		2017-11-08T23:11:17Z	0700	4_length_b	a 1 b 2 c
 	`
-
 	reader := strings.NewReader(files)
-	err = TreeCreate(reader)
+	_, cleanup, err := TempCreateChdir(reader)
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer cleanup()
 
 	less := ByContent(t)
 
