@@ -9,9 +9,20 @@ import (
 	"testing"
 )
 
-// FileRank is the signature of functions which can be
+// FileRank is the signature of functions which are
 // provided to TreeDiff to compare two *FileInfoPath structs
-// and related files
+// and related files.
+//
+// When comparing filesystem objects, the algorithm used in
+// the TreeDiff function expects the "less-than" logic from
+// comparator functions. It means, that a comparator is expected
+// to return "true" if and only if the "left"  parameter is
+// strictly less than the "right" parameter according to the
+// comparator's criteria.
+//
+// FileRank does not provide an error handling interface. If
+// needed, it can be implemented via a closure. See the
+// ByContent comparator generator for an example of it.
 type FileRank func(left, right *FileInfoPath) bool
 
 // ByName is basic for comparing directories and should
