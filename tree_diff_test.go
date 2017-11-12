@@ -22,18 +22,7 @@ func TestTreeDiff(t *testing.T) {
 	}
 	defer cleanup()
 
-	err = filepath.Walk(".", func(p string, i os.FileInfo, err error) error {
-		if err != nil {
-			t.Fatal(err)
-		}
-		if filepath.Base(p) == "delete.me" {
-			if os.Remove(p) != nil {
-				t.Fatal(err)
-			}
-		}
-		return nil
-	})
-
+	err = FileDelAll(".", "delete.me")
 	if err != nil {
 		t.Fatal(err)
 	}
