@@ -23,7 +23,7 @@ func ExampleTreeCreate() {
 		return ""
 	}
 
-	_, cleanup, err := InitTempChdir()
+	_, cleanup, err := TempInitChdir()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func TestTreeCreate(t *testing.T) {
 		{time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "aaa/bbb", ""},
 	}
 
-	_, cleanup, err := InitTempChdir()
+	_, cleanup, err := TempInitChdir()
 	if err != nil {
 		t.Fatal(err)
 	}

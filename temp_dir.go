@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-// InitTempDir function creates a directory for holding
+// TempInitDir function creates a directory for holding
 // temporary files according to platform preferences and
 // returns the directory name and a cleanup function.
 //
@@ -27,7 +27,7 @@ import (
 // directory, then the returned directory name is empty,
 // cleanup funcion is nil, and the temp folder is
 // expected to be already removed.
-func InitTempDir() (string, func(), error) {
+func TempInitDir() (string, func(), error) {
 	root, err := ioutil.TempDir("", "")
 	if err != nil {
 		os.RemoveAll(root)
@@ -67,8 +67,8 @@ func InitTempDir() (string, func(), error) {
 	}, nil
 }
 
-// InitTempChdir creates a temporary directory in the same
-// fashion as InitTempDir. It also changes into the newly
+// TempInitChdir creates a temporary directory in the same
+// fashion as TempInitDir. It also changes into the newly
 // created temporary directory and adds returning back
 // to the old working directory to the returned cleanup
 // function. The returned values are:
@@ -79,8 +79,8 @@ func InitTempDir() (string, func(), error) {
 // directory and to delete the temporary directory
 //
 // 3. an error
-func InitTempChdir() (string, func(), error) {
-	root, cleanup, err := InitTempDir()
+func TempInitChdir() (string, func(), error) {
+	root, cleanup, err := TempInitDir()
 	if err != nil {
 		return "", nil, err
 	}
@@ -105,7 +105,7 @@ func InitTempChdir() (string, func(), error) {
 		nil
 }
 
-// CloneTempDir function creates a copy of an existing
+// TempCloneDir function creates a copy of an existing
 // directory with it's content - regular files only - for
 // holding temporary test files.
 //
@@ -128,8 +128,8 @@ func InitTempChdir() (string, func(), error) {
 // If, however, the user does not have read permission
 // for a file, or read+execute permission for a directory,
 // then the clone process will naturally fail.
-func CloneTempDir(src string) (string, func(), error) {
-	root, cleanup, err := InitTempDir()
+func TempCloneDir(src string) (string, func(), error) {
+	root, cleanup, err := TempInitDir()
 	if err != nil {
 		return "", nil, err
 	}
@@ -143,8 +143,8 @@ func CloneTempDir(src string) (string, func(), error) {
 	return root, cleanup, nil
 }
 
-// CloneTempChdir clones a temporary directory in the same
-// fashion as CloneTempDir. It also changes into the newly
+// TempCloneChdir clones a temporary directory in the same
+// fashion as TempCloneDir. It also changes into the newly
 // cloned temporary directory and adds returning back
 // to the old working directory to the returned cleanup
 // function. The returned values are:
@@ -155,8 +155,8 @@ func CloneTempDir(src string) (string, func(), error) {
 // directory and to delete the temporary directory
 //
 // 3. an error
-func CloneTempChdir(src string) (string, func(), error) {
-	root, cleanup, err := CloneTempDir(src)
+func TempCloneChdir(src string) (string, func(), error) {
+	root, cleanup, err := TempCloneDir(src)
 	if err != nil {
 		return "", nil, err
 	}

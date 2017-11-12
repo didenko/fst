@@ -11,7 +11,7 @@ import (
 
 func TestByContent(t *testing.T) {
 
-	_, cleanup, err := InitTempChdir()
+	_, cleanup, err := TempInitChdir()
 	if err != nil {
 		log.Fatal(err)
 	}

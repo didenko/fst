@@ -12,9 +12,9 @@ import (
 	"testing"
 )
 
-func ExampleInitTempDir() {
+func ExampleTempInitDir() {
 
-	root, cleanup, err := InitTempDir()
+	root, cleanup, err := TempInitDir()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,10 +23,10 @@ func ExampleInitTempDir() {
 	fmt.Printf("Here goes the code using the temporary directory at %s\n", root)
 }
 
-func TestInitTempDir(t *testing.T) {
+func TestTempInitDir(t *testing.T) {
 
 	// Get the values and create the test root dir to be tested
-	testRootDir, cleanup, err := InitTempDir()
+	testRootDir, cleanup, err := TempInitDir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestInitTempDir(t *testing.T) {
 	}
 }
 
-func TestInitTempChdir(t *testing.T) {
+func TestTempInitChdir(t *testing.T) {
 
 	// Capture the old workdir
 	origWD, err := os.Getwd()
@@ -62,7 +62,7 @@ func TestInitTempChdir(t *testing.T) {
 	}
 
 	// Get the values and create the test root dir to be tested
-	old, cleanup, err := InitTempChdir()
+	old, cleanup, err := TempInitChdir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,9 +100,9 @@ func TestInitTempChdir(t *testing.T) {
 	}
 }
 
-func TestInitTempDirRestrictedPermissions(t *testing.T) {
+func TestTempInitDirRestrictedPermissions(t *testing.T) {
 
-	root, cleanup, err := InitTempDir()
+	root, cleanup, err := TempInitDir()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,9 +142,9 @@ func TestInitTempDirRestrictedPermissions(t *testing.T) {
 	}
 }
 
-func ExampleCloneTempDir() {
+func ExampleTempCloneDir() {
 
-	root, cleanup, err := CloneTempDir("./mock")
+	root, cleanup, err := TempCloneDir("./mock")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -153,12 +153,12 @@ func ExampleCloneTempDir() {
 	fmt.Printf("Here goes the code using the temporary directory at %s\n", root)
 }
 
-func TestCloneTempDir(t *testing.T) {
+func TestTempCloneDir(t *testing.T) {
 
 	const src string = "./temp_dir_mocks"
 
 	// Get the values and create the test root dir to be tested
-	testRootDir, cleanup, err := CloneTempDir(src)
+	testRootDir, cleanup, err := TempCloneDir(src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,7 +194,7 @@ func TestCloneTempDir(t *testing.T) {
 	}
 }
 
-func TestCloneTempChdir(t *testing.T) {
+func TestTempCloneChdir(t *testing.T) {
 
 	// Capture the old workdir
 	origWD, err := os.Getwd()
@@ -206,7 +206,7 @@ func TestCloneTempChdir(t *testing.T) {
 	src := "./temp_dir_mocks"
 
 	// Get the values and clone the test root dir to be tested
-	old, cleanup, err := CloneTempChdir(src)
+	old, cleanup, err := TempCloneChdir(src)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import "testing"
 import "strings"
 
 func TestTreeCopy(t *testing.T) {
-	_, cleanup, err := InitTempChdir()
+	_, cleanup, err := TempInitChdir()
 	if err != nil {
 		t.Fatal(err)
 	}
