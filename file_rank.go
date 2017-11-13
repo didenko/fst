@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"os"
 	"testing"
+	"time"
 )
 
 // FileRank is the signature of functions which are
@@ -45,9 +46,10 @@ func BySize(left, right *FileInfoPath) bool {
 		(left.Size() < right.Size())
 }
 
-// ByTime compares files' last modification times
+// ByTime compares files' last modification times with up to
+// 10µs precision to accommodate filesyustem quirks
 func ByTime(left, right *FileInfoPath) bool {
-	return left.ModTime().Before(right.ModTime())
+	return left.ModTime().Before(right.ModTime().Add(-10 * time.Microsecond))
 }
 
 // ByPerm compares bits 0-8 of Unix-like file permissions
