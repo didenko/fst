@@ -8,9 +8,9 @@ The suggested package name pronounciation is _"fist"_.
 
 ## Purpose
 
-At times it is desireable to test a program behavior which creates or modifies files and directories. Such tests may be quite involved especially if checking permissions or timestamps. A proper cleanup is also considered an nuissance. The whole effort becomes extra burdesome as such filesystem manipulation has to be tested itself - so one ends up with tests of tests.
+At times it is desireable to test a program behavior which creates or modifies files and directories. Such tests may be quite involved especially if checking permissions or timestamps. A proper cleanup is also considered a nuisance. The whole effort becomes extra burdesome as such filesystem manipulation has to be tested itself - so one ends up with tests of tests.
 
-The `fst` library is a tested set of functions aiming to aleviate the burden. It makes creating and comparing filesystem trees of regular files and directories for testing puposes simple.
+The `fst` library is a tested set of functions aiming to alleviate the burden. It makes creating and comparing filesystem trees of regular files and directories for testing puposes simple.
 
 ## Highlights
 
@@ -32,7 +32,7 @@ If an error was returned, then no temporary directory was left behind (after a r
 
 The ***cleanup*** function has the code to change back to the original directory and then delete the temporary directory.
 
-As the _TempCloneChdir_ relies on the `TreeCopy` function, it will attempt to recreate both permissions and timestamps from the source directory. Keep im mind, that popular version control systems like _Git_ and _Mercurial_ do not preserve original files' timestamps. If your tests rely on timestamped files or directories then _TreeCreate_ or it's derivative _TempCreateChdir_ functions are your friends.
+As the _TempCloneChdir_ relies on the `TreeCopy` function, it will attempt to recreate both permissions and timestamps from the source directory. Keep in mind, that popular version control systems like _Git_ and _Mercurial_ do not preserve original files' timestamps. If your tests rely on timestamped files or directories then _TreeCreate_ or it's derivative _TempCreateChdir_ functions are your friends.
 
 ### <span id="TempCreateChdir" />[TempCreateChdir](https://godoc.org/go.didenko.com/fst#TempCreateChdir)
 
@@ -60,7 +60,7 @@ The _TempCreateChdir_ function removes the temporary directory it creates as a p
 
 The _TreeDiff_ function produces a human-readable output of differences between two directory trees for diagnostic purposes. The resulting slice of strings is empty if no differences are found.
 
-Criteria for comparing filesystem objecs varies based on a task, so _TreeDiff_ takes a list of comparator functions. The most common ones are provided with the `fst` package. Users are free to provide their own additional comparators which satisfy the [_FileRank_](https://godoc.org/go.didenko.com/fst#FileRank) signature.
+Criteria for comparing filesystem objects varies based on a task, so _TreeDiff_ takes a list of comparator functions. The most common ones are provided with the `fst` package. Users are free to provide their own additional comparators which satisfy the [_FileRank_](https://godoc.org/go.didenko.com/fst#FileRank) signature.
 
 A quick example of a common _TreeDiff_ use:
 
@@ -84,6 +84,6 @@ It is easy to provide overly restrictive permissions using the tree cloning and 
 
 ## Limitations
 
-Functions in `fst` expect a reasonably shallow and small directory structures to deal with, as that is what usually happens in testing. During build-up, tear-down, and comparisons it creates collections of filesystem object names in memory. It is not nesessarily efficient but allows for more graceful permissions handling.
+Functions in `fst` expect a reasonably shallow and small directory structures to deal with, as that is what usually happens in testing. During build-up, tear-down, and comparisons it creates collections of filesystem object names in memory. It is not necessarily efficient but allows for more graceful permissions handling.
 
 If you are concerned that you will hold a few copies of full filenames' lists during the execution, then this library may be a poor match to your needs.
