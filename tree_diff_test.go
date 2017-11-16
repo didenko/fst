@@ -16,7 +16,7 @@ type DiffCase struct {
 
 func TestTreeDiff(t *testing.T) {
 
-	_, cleanup, err := TempCloneChdir("tree_diff_mocks")
+	_, cleanup, err := TempCloneChdir("testdata/tree_diff_mocks")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestTreeDiff(t *testing.T) {
 // sets timestamps correctly instead of fighting git.
 func TestTreeDiffTimes(t *testing.T) {
 
-	mocks, err := os.Open("tree_diff_time_mocks")
+	mocks, err := os.Open("testdata/tree_diff_time_mocks")
 	if err != nil {
 		t.Fatal(err)
 	}
