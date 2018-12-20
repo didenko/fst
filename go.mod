@@ -1,1 +1,1 @@
-module go.didenko.com/fst
+module go.didenko.com/fst/v2
