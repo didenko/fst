@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-type dirEntry struct {
+// DirEntry holds basic attributes of an item in a directory
+type DirEntry struct {
 	name string
 	perm os.FileMode
 	time time.Time
@@ -23,7 +24,7 @@ func TreeCopy(src, dst string) error {
 
 	srcClean := filepath.Clean(src)
 	srcLen := len(srcClean)
-	dirs := make([]*dirEntry, 0)
+	dirs := make([]*DirEntry, 0)
 
 	err := filepath.Walk(
 		srcClean,
@@ -73,7 +74,7 @@ func TreeCopy(src, dst string) error {
 
 			if fi.Mode().IsDir() {
 
-				dirs = append(dirs, &dirEntry{dest, fi.Mode().Perm(), fi.ModTime()})
+				dirs = append(dirs, &DirEntry{dest, fi.Mode().Perm(), fi.ModTime()})
 				return os.Mkdir(dest, 0700)
 			}
 			return nil

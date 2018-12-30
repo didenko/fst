@@ -51,7 +51,7 @@ type emptyErr struct {
 // problem it runs into.
 func TreeCreate(config io.Reader) error {
 
-	dirs := make([]*dirEntry, 0)
+	dirs := make([]*DirEntry, 0)
 
 	scanner := bufio.NewScanner(config)
 	for scanner.Scan() {
@@ -71,7 +71,7 @@ func TreeCreate(config io.Reader) error {
 				return err
 			}
 
-			dirs = append(dirs, &dirEntry{name, perm, mt})
+			dirs = append(dirs, &DirEntry{name, perm, mt})
 			continue
 		}
 
