@@ -194,7 +194,7 @@ func TempCreateChdir(config io.Reader) (string, func(), error) {
 		return "", nil, err
 	}
 
-	err = TreeCreate(config)
+	err = TreeCreateFromReader(config)
 	if err != nil {
 		cleanup()
 		return "", nil, err

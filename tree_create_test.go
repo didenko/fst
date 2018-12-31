@@ -72,7 +72,7 @@ func TestTreeCreate(t *testing.T) {
 	defer cleanup()
 
 	reader := strings.NewReader(dirs)
-	err = TreeCreate(reader)
+	err = TreeCreateFromReader(reader)
 	if err != nil {
 		t.Fatal(err)
 	}

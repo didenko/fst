@@ -15,8 +15,16 @@ type emptyErr struct {
 	error
 }
 
-// TreeCreate parses a suplied Reader for the tree information
-// and follows the instructions to create files and directories.
+// EntryWithContent holds both DirEntry and a content
+// for that DirEntry
+type EntryWithContent struct {
+	*DirEntry
+	content string
+}
+
+// TreeCreateFromReader parses a suplied Reader for the tree
+// information and follows the instructions to create files
+// and directories.
 //
 // The input has line records with three or four fields
 // separated by one or more tabs. White space is trimmed on
@@ -46,12 +54,12 @@ type emptyErr struct {
 // Directory entries ignore Field 4 if present.
 //
 // It is up to the caller to deal with conflicting file and
-// directory names in the input. TreeCreate processes the
-// input line-by-line and will return with error at a first
+// directory names in the input. TreeCreateFromReader processes
+// the input line-by-line and will return with error at a first
 // problem it runs into.
-func TreeCreate(config io.Reader) error {
+func TreeCreateFromReader(config io.Reader) error {
 
-	dirs := make([]*DirEntry, 0)
+	entries := make([]*EntryWithContent, 0, 10)
 
 	scanner := bufio.NewScanner(config)
 	for scanner.Scan() {
@@ -64,24 +72,41 @@ func TreeCreate(config io.Reader) error {
 			return err
 		}
 
-		if name[len(name)-1] == '/' {
-			name = name[:len(name)-1]
+		entries = append(entries, &EntryWithContent{&DirEntry{name, perm, mt}, content})
+	}
 
-			if err = os.Mkdir(name, 0700); err != nil {
+	err := scanner.Err()
+	if err != nil {
+		return err
+	}
+
+	return TreeCreate(entries)
+}
+
+// TreeCreate Iterates over the channel and creates
+// directories and files
+func TreeCreate(entries []*EntryWithContent) error {
+
+	dirs := make([]*DirEntry, 0)
+
+	for _, e := range entries {
+
+		if e.name[len(e.name)-1] == '/' {
+			if err := os.Mkdir(e.name[:len(e.name)-1], 0700); err != nil {
 				return err
 			}
 
-			dirs = append(dirs, &DirEntry{name, perm, mt})
+			dirs = append(dirs, e.DirEntry)
 			continue
 		}
 
-		f, err := os.Create(name)
+		f, err := os.Create(e.name)
 		if err != nil {
 			return err
 		}
 
-		if len(content) > 0 {
-			_, err = f.WriteString(content)
+		if len(e.content) > 0 {
+			_, err = f.WriteString(e.content)
 			if err != nil {
 				return err
 			}
@@ -92,32 +117,30 @@ func TreeCreate(config io.Reader) error {
 			return err
 		}
 
-		err = os.Chmod(name, perm)
-		if err != nil {
-			return err
-		}
-
-		err = os.Chtimes(name, mt, mt)
-		if err != nil {
+		if err = setAttributes(e.DirEntry); err != nil {
 			return err
 		}
 	}
 
-	err := scanner.Err()
+	for i := len(dirs) - 1; i >= 0; i-- {
+		if err := setAttributes(dirs[i]); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func setAttributes(item *DirEntry) error {
+
+	err := os.Chmod(item.name, item.perm)
 	if err != nil {
 		return err
 	}
 
-	for i := len(dirs) - 1; i >= 0; i-- {
-		err := os.Chmod(dirs[i].name, dirs[i].perm)
-		if err != nil {
-			return err
-		}
-
-		err = os.Chtimes(dirs[i].name, dirs[i].time, dirs[i].time)
-		if err != nil {
-			return err
-		}
+	err = os.Chtimes(item.name, item.time, item.time)
+	if err != nil {
+		return err
 	}
 
 	return nil
