@@ -15,13 +15,6 @@ type emptyErr struct {
 	error
 }
 
-// EntryWithContent holds both DirEntry and a content
-// for that DirEntry
-type EntryWithContent struct {
-	*DirEntry
-	content string
-}
-
 // TreeCreateFromReader parses a suplied Reader for the tree
 // information and follows the instructions to create files
 // and directories.
@@ -59,7 +52,7 @@ type EntryWithContent struct {
 // problem it runs into.
 func TreeCreateFromReader(config io.Reader) error {
 
-	entries := make([]*EntryWithContent, 0, 10)
+	entries := make([]*DirEntry, 0, 10)
 
 	scanner := bufio.NewScanner(config)
 	for scanner.Scan() {
@@ -72,7 +65,7 @@ func TreeCreateFromReader(config io.Reader) error {
 			return err
 		}
 
-		entries = append(entries, &EntryWithContent{&DirEntry{name, perm, mt}, content})
+		entries = append(entries, &DirEntry{name, perm, mt, content})
 	}
 
 	err := scanner.Err()
@@ -85,7 +78,7 @@ func TreeCreateFromReader(config io.Reader) error {
 
 // TreeCreate Iterates over the channel and creates
 // directories and files
-func TreeCreate(entries []*EntryWithContent) error {
+func TreeCreate(entries []*DirEntry) error {
 
 	dirs := make([]*DirEntry, 0)
 
@@ -96,7 +89,7 @@ func TreeCreate(entries []*EntryWithContent) error {
 				return err
 			}
 
-			dirs = append(dirs, e.DirEntry)
+			dirs = append(dirs, e)
 			continue
 		}
 
@@ -105,8 +98,8 @@ func TreeCreate(entries []*EntryWithContent) error {
 			return err
 		}
 
-		if len(e.content) > 0 {
-			_, err = f.WriteString(e.content)
+		if len(e.body) > 0 {
+			_, err = f.WriteString(e.body)
 			if err != nil {
 				return err
 			}
@@ -117,7 +110,7 @@ func TreeCreate(entries []*EntryWithContent) error {
 			return err
 		}
 
-		if err = setAttributes(e.DirEntry); err != nil {
+		if err = setAttributes(e); err != nil {
 			return err
 		}
 	}

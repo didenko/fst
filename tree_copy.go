@@ -7,15 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"time"
 )
-
-// DirEntry holds basic attributes of an item in a directory
-type DirEntry struct {
-	name string
-	perm os.FileMode
-	time time.Time
-}
 
 // TreeCopy duplicates redular files and directories from
 // inside the source directory into an existing destination
@@ -74,7 +66,7 @@ func TreeCopy(src, dst string) error {
 
 			if fi.Mode().IsDir() {
 
-				dirs = append(dirs, &DirEntry{dest, fi.Mode().Perm(), fi.ModTime()})
+				dirs = append(dirs, &DirEntry{dest, fi.Mode().Perm(), fi.ModTime(), ""})
 				return os.Mkdir(dest, 0700)
 			}
 			return nil
