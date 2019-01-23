@@ -42,7 +42,7 @@ func match(t *testing.T, f *tcase, fi os.FileInfo) {
 	}
 }
 
-func TestTreeCreate(t *testing.T) {
+func TestTreeCreateFromReader(t *testing.T) {
 
 	dirs := `
 		2001-01-01T01:01:01Z	0150	aaa/
@@ -73,6 +73,61 @@ func TestTreeCreate(t *testing.T) {
 
 	reader := strings.NewReader(dirs)
 	err = TreeCreateFromReader(reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	files, err := ioutil.ReadDir(".")
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	for i, fi := range files {
+		if fi.Name() != expect[i].n {
+			t.Errorf("Names mismatch, expected \"%v\", got \"%v\"", expect[i].n, fi.Name())
+		}
+		match(t, &expect[i], fi)
+	}
+
+	for _, tc := range expect {
+		f := tc.n
+		fi, err := os.Stat(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		match(t, &tc, fi)
+	}
+}
+
+func TestTreeCreateApi(t *testing.T) {
+	items := []*DirEntry{
+		&DirEntry{name: "aaa/", perm: 0150, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC)},
+		&DirEntry{name: "c.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "This is a two line\nfile with\ta tab\n"},
+		&DirEntry{name: "d.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "No need to quote a single line without tabs"},
+		&DirEntry{name: "has\ttab/", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC)},
+		&DirEntry{name: "has\ttab/e.mb", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+		&DirEntry{name: "\u10077heavy quoted\u10078", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+		&DirEntry{name: "aaa/bbb", perm: 0700, time: time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+	}
+
+	expect := []tcase{
+		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0150, "aaa", ""},
+		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "c.txt", ""},
+		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "d.txt", "No need to quote a single line without tabs"},
+		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "has\ttab", ""},
+		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "\u10077heavy quoted\u10078", ""},
+		{time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "aaa/bbb", ""},
+	}
+
+	_, cleanup, err := TempInitChdir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cleanup()
+
+	err = TreeCreate(items)
 	if err != nil {
 		t.Fatal(err)
 	}
