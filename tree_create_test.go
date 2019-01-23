@@ -102,14 +102,14 @@ func TestTreeCreateFromReader(t *testing.T) {
 }
 
 func TestTreeCreateApi(t *testing.T) {
-	items := []*DirEntry{
-		&DirEntry{name: "aaa/", perm: 0150, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC)},
-		&DirEntry{name: "c.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "This is a two line\nfile with\ta tab\n"},
-		&DirEntry{name: "d.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "No need to quote a single line without tabs"},
-		&DirEntry{name: "has\ttab/", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC)},
-		&DirEntry{name: "has\ttab/e.mb", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
-		&DirEntry{name: "\u10077heavy quoted\u10078", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
-		&DirEntry{name: "aaa/bbb", perm: 0700, time: time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+	items := []*Node{
+		&Node{name: "aaa/", perm: 0150, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC)},
+		&Node{name: "c.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "This is a two line\nfile with\ta tab\n"},
+		&Node{name: "d.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "No need to quote a single line without tabs"},
+		&Node{name: "has\ttab/", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC)},
+		&Node{name: "has\ttab/e.mb", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+		&Node{name: "\u10077heavy quoted\u10078", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+		&Node{name: "aaa/bbb", perm: 0700, time: time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
 	}
 
 	expect := []tcase{

@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// DirEntry holds basic attributes of a filesystem item.
+// Node holds basic attributes of a filesystem item.
 // Its name is relative to CWD.
-type DirEntry struct {
+type Node struct {
 	name string
 	perm os.FileMode
 	time time.Time

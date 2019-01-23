@@ -52,7 +52,7 @@ type emptyErr struct {
 // problem it runs into.
 func TreeCreateFromReader(config io.Reader) error {
 
-	entries := make([]*DirEntry, 0, 10)
+	entries := make([]*Node, 0, 10)
 
 	scanner := bufio.NewScanner(config)
 	for scanner.Scan() {
@@ -65,7 +65,7 @@ func TreeCreateFromReader(config io.Reader) error {
 			return err
 		}
 
-		entries = append(entries, &DirEntry{name, perm, mt, content})
+		entries = append(entries, &Node{name, perm, mt, content})
 	}
 
 	err := scanner.Err()
@@ -78,9 +78,9 @@ func TreeCreateFromReader(config io.Reader) error {
 
 // TreeCreate Iterates over the channel and creates
 // directories and files
-func TreeCreate(entries []*DirEntry) error {
+func TreeCreate(entries []*Node) error {
 
-	dirs := make([]*DirEntry, 0)
+	dirs := make([]*Node, 0)
 
 	for _, e := range entries {
 
@@ -124,7 +124,7 @@ func TreeCreate(entries []*DirEntry) error {
 	return nil
 }
 
-func setAttributes(item *DirEntry) error {
+func setAttributes(item *Node) error {
 
 	err := os.Chmod(item.name, item.perm)
 	if err != nil {
