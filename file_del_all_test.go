@@ -3,31 +3,28 @@
 
 package fst // import "go.didenko.com/fst"
 
-import "testing"
-import "strings"
+import (
+	"testing"
+)
 
 func TestFileDelAll(t *testing.T) {
 
-	tree := `
-		2018-01-01T01:01:01Z	0750	mock/
-		2018-01-02T03:04:05Z	0640	mock/.gitkeep
-		2018-02-03T04:05:06Z	0640	mock/text.txt
-		2018-03-04T05:06:07Z	0750	mock/dir/
-		2018-04-05T06:07:08Z	0640	mock/dir/.gitkeep
-		2018-05-06T07:08:09Z	0640	mock/dir/text.txt
-		2018-06-04T08:09:10Z	0750	mock/dir/dir/
-		2018-07-05T09:10:11Z	0640	mock/dir/dir/.gitkeep
-		2018-08-06T10:11:12Z	0640	mock/dir/dir/text.txt
-		2018-01-01T01:01:01Z	0750	test/
-		2018-02-03T04:05:06Z	0640	test/text.txt
-		2018-03-04T05:06:07Z	0750	test/dir/
-		2018-05-06T07:08:09Z	0640	test/dir/text.txt
-		2018-06-04T08:09:10Z	0750	test/dir/dir/
-		2018-08-06T10:11:12Z	0640	test/dir/dir/text.txt
-	`
-	nodes, err := TreeParseReader(strings.NewReader(tree))
-	if err != nil {
-		t.Fatal(err)
+	nodes := []*Node{
+		&Node{0750, Rfc3339(t, "2018-01-01T01:01:01Z"), "mock/", ""},
+		&Node{0640, Rfc3339(t, "2018-01-02T03:04:05Z"), "mock/.gitkeep", ""},
+		&Node{0640, Rfc3339(t, "2018-02-03T04:05:06Z"), "mock/text.txt", ""},
+		&Node{0750, Rfc3339(t, "2018-03-04T05:06:07Z"), "mock/dir/", ""},
+		&Node{0640, Rfc3339(t, "2018-04-05T06:07:08Z"), "mock/dir/.gitkeep", ""},
+		&Node{0640, Rfc3339(t, "2018-05-06T07:08:09Z"), "mock/dir/text.txt", ""},
+		&Node{0750, Rfc3339(t, "2018-06-04T08:09:10Z"), "mock/dir/dir/", ""},
+		&Node{0640, Rfc3339(t, "2018-07-05T09:10:11Z"), "mock/dir/dir/.gitkeep", ""},
+		&Node{0640, Rfc3339(t, "2018-08-06T10:11:12Z"), "mock/dir/dir/text.txt", ""},
+		&Node{0750, Rfc3339(t, "2018-01-01T01:01:01Z"), "test/", ""},
+		&Node{0640, Rfc3339(t, "2018-02-03T04:05:06Z"), "test/text.txt", ""},
+		&Node{0750, Rfc3339(t, "2018-03-04T05:06:07Z"), "test/dir/", ""},
+		&Node{0640, Rfc3339(t, "2018-05-06T07:08:09Z"), "test/dir/text.txt", ""},
+		&Node{0750, Rfc3339(t, "2018-06-04T08:09:10Z"), "test/dir/dir/", ""},
+		&Node{0640, Rfc3339(t, "2018-08-06T10:11:12Z"), "test/dir/dir/text.txt", ""},
 	}
 
 	_, cleanup, err := TempCreateChdir(nodes)

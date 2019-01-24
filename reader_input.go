@@ -111,7 +111,7 @@ func TreeParseReader(config io.Reader) ([]*Node, error) {
 			return nil, err
 		}
 
-		entries = append(entries, &Node{name, perm, mt, content})
+		entries = append(entries, &Node{perm, mt, name, content})
 	}
 
 	err := scanner.Err()

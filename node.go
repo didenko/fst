@@ -5,15 +5,16 @@ package fst // import "go.didenko.com/fst"
 
 import (
 	"os"
+	"testing"
 	"time"
 )
 
 // Node holds basic attributes of a filesystem item.
 // Its name is relative to CWD.
 type Node struct {
-	name string
 	perm os.FileMode
 	time time.Time
+	name string
 	body string
 }
 
@@ -32,4 +33,15 @@ func (n *Node) SaveAttributes() error {
 	}
 
 	return nil
+}
+
+// Rfc3339 converts a string to a time struct while assuming
+// the string is formatted according to RFC3339. It calls
+// t.Fatal if the conversion fails.
+func Rfc3339(t *testing.T, ts string) time.Time {
+	tm, err := time.Parse(time.RFC3339, ts)
+	if err != nil {
+		t.Fatalf("Failed to convert %q to a time: %q", ts, err)
+	}
+	return tm
 }

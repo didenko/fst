@@ -66,7 +66,7 @@ func TreeCopy(src, dst string) error {
 
 			if fi.Mode().IsDir() {
 
-				dirs = append(dirs, &Node{dest, fi.Mode().Perm(), fi.ModTime(), ""})
+				dirs = append(dirs, &Node{fi.Mode().Perm(), fi.ModTime(), dest, ""})
 				return os.Mkdir(dest, 0700)
 			}
 			return nil
