@@ -16,3 +16,20 @@ type Node struct {
 	time time.Time
 	body string
 }
+
+// SaveAttributes sets the named file's permissions and
+// timestamps to the ones from the node.
+func (n *Node) SaveAttributes() error {
+
+	err := os.Chmod(n.name, n.perm)
+	if err != nil {
+		return err
+	}
+
+	err = os.Chtimes(n.name, n.time, n.time)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
