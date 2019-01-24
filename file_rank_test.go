@@ -4,31 +4,26 @@
 package fst // import "go.didenko.com/fst"
 
 import (
-	"strings"
 	"testing"
 )
 
 func TestByContent(t *testing.T) {
 
-	files := `
-		2017-11-08T23:11:17Z	0700	1_same_a	a 1 b 2 c 3 d 4\n
-		2017-11-08T23:11:17Z	0700	1_same_b	a 1 b 2 c 3 d 4\n
+	files := []*Node{
+		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "1_same_a", "a 1 b 2 c 3 d 4\n"},
+		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "1_same_b", "a 1 b 2 c 3 d 4\n"},
 
-		2017-11-08T23:11:17Z	0700	2_diff_a	a 1 b 2 c 3 d 4\n
-		2017-11-08T23:11:17Z	0700	2_diff_b	a 1 b 2 b 2\n
+		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "2_diff_a", "a 1 b 2 c 3 d 4\n"},
+		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "2_diff_b", "a 1 b 2 b 2\n"},
 
-		2017-11-08T23:11:17Z	0700	3_empty_a
-		2017-11-08T23:11:17Z	0700	3_empty_b
+		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "3_empty_a", ""},
+		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "3_empty_b", ""},
 
-		2017-11-08T23:11:17Z	0700	4_length_a	a 1 b 2 c 3 d 4\n
-		2017-11-08T23:11:17Z	0700	4_length_b	a 1 b 2 c
-	`
-	nodes, err := TreeParseReader(strings.NewReader(files))
-	if err != nil {
-		t.Fatal(err)
+		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "4_length_a", "a 1 b 2 c 3 d 4\n"},
+		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "4_length_b", "a 1 b 2 c"},
 	}
 
-	_, cleanup, err := TempCreateChdir(nodes)
+	_, cleanup, err := TempCreateChdir(files)
 	if err != nil {
 		t.Fatal(err)
 	}

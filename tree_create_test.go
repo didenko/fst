@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
-	"strings"
 	"testing"
 	"time"
 )
@@ -44,22 +43,20 @@ func match(t *testing.T, f *tcase, fi os.FileInfo) {
 
 func TestTreeCreateFromReader(t *testing.T) {
 
-	dirs := `
-		2001-01-01T01:01:01Z	0150	aaa/
-		2099-01-01T01:01:01Z	0700	aaa/bbb/
-
-		2001-01-01T01:01:01Z	0700	c.txt	"This is a two line\nfile with\ta tab\n"
-		2001-01-01T01:01:01Z	0700	d.txt	No need to quote a single line without tabs
-
-		2002-01-01T01:01:01Z	0700	"has\ttab/"
-		2002-01-01T01:01:01Z	0700	"has\ttab/e.mb"	"# Markdown...\n\n... also ***possible***\n"
-
-		2002-01-01T01:01:01Z	0700	"\u10077heavy quoted\u10078/"`
+	nodes := []*Node{
+		&Node{0150, Rfc3339(t, "2001-01-01T01:01:01Z"), "aaa/", ""},
+		&Node{0700, Rfc3339(t, "2099-01-01T01:01:01Z"), "aaa/bbb/", ""},
+		&Node{0700, Rfc3339(t, "2001-01-01T01:01:01Z"), "c.txt", "This is a two line\nfile with\ta tab\n"},
+		&Node{0700, Rfc3339(t, "2001-01-01T01:01:01Z"), "d.txt", "A single line without tabs"},
+		&Node{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "has\ttab/", ""},
+		&Node{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "has\ttab/e.mb", "# Markdown...\n\n... also ***possible***\n"},
+		&Node{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "\u10077heavy quoted\u10078/", ""},
+	}
 
 	expect := []tcase{
 		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0150, "aaa", ""},
 		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "c.txt", ""},
-		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "d.txt", "No need to quote a single line without tabs"},
+		{time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "d.txt", "A single line without tabs"},
 		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "has\ttab", ""},
 		{time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "\u10077heavy quoted\u10078", ""},
 		{time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "aaa/bbb", ""},
@@ -70,11 +67,6 @@ func TestTreeCreateFromReader(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer cleanup()
-
-	nodes, err := TreeParseReader(strings.NewReader(dirs))
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	err = TreeCreate(nodes)
 	if err != nil {

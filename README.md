@@ -39,17 +39,13 @@ As the _TempCloneChdir_ relies on the `TreeCopy` function, it will attempt to re
 The _TempCreateChdir_ function provides an API-like way to create and populate a temporary directory tree for testing. It takes an _io.Reader_, from which is expects to receive lines with ***tab-separated*** fields describing the directories and files to be populated. Here is an a hypothetical example:
 
 ```go
-tree := `
-2017-11-12T13:14:15Z	0750	settings/
-2017-11-12T13:14:15Z	0640	settings/theme1.toml	key = val1
-2017-11-12T13:14:15Z	0640	settings/theme2.toml	key = val2
-`
-nodes, err := TreeParseReader(strings.NewReader(tree))
-if err != nil {
-  t.Fatal(err)
+nodes := []*fst.Node{
+  &fst.Node{0750, fst.Rfc3339(t, "2017-11-12T13:14:15Z"), "settings/", ""},
+  &fst.Node{0640, fst.Rfc3339(t, "2017-11-12T13:14:15Z"), "settings/theme1.toml", "key = val1"},
+  &fst.Node{0640, fst.Rfc3339(t, "2017-11-12T13:14:15Z"), "settings/theme2.toml", "key = val2"},
 }
 
-old, cleanup, err = TempCreateChdir(nodes)
+old, cleanup, err = fst.TempCreateChdir(nodes)
 if err != nil {
   t.Fatal(err)
 }
@@ -69,9 +65,9 @@ Criteria for comparing filesystem objects varies based on a task, so _TreeDiff_ 
 A quick example of a common _TreeDiff_ use:
 
 ```go
-diffs, err := TreeDiff(
+diffs, err := fst.TreeDiff(
   "dir1", "dir2",
-  ByName, ByDir, BySize, ByContent(t))
+  fst.ByName, fst.ByDir, fst.BySize, fst.ByContent(t))
 
 if err != nil {
   t.Fatal(err)
@@ -91,3 +87,28 @@ It is easy to provide overly restrictive permissions using the tree cloning and 
 Functions in `fst` expect a reasonably shallow and small directory structures to deal with, as that is what usually happens in testing. During build-up, tear-down, and comparisons it creates collections of filesystem object names in memory. It is not necessarily efficient but allows for more graceful permissions handling.
 
 If you are concerned that you will hold a few copies of full filenames' lists during the execution, then this library may be a poor match to your needs.
+
+## Version 1 transition
+
+Version 1.x of the `fst` package had relied solely on the `io.Reader` interface to feed `fst.TreeCreate` and its derivative funcs with file informaion. While it seemed as a good idea at the time, in practice it provided little utility. With that it had adversely hidden the parsing logic in the `fst.TreeCreate` function.
+
+Versions 2.x breaks the compatibility: instead of `io.Reader` those funcs now expect a `[]*Node` - thus allowing better checks at compile time and better testing of the `fst` package.
+
+The provided func `fst.ParseReader` simplifies transition form Version 1.x. It has the parsing logic extracted from `fst.TreeCreate`. Here is an example of using it:
+
+```go
+tree := `
+2017-11-12T13:14:15Z	0750	settings/
+2017-11-12T13:14:15Z	0640	settings/theme1.toml	key = val1
+2017-11-12T13:14:15Z	0640	settings/theme2.toml	key = val2
+`
+nodes := TreeParseReader(t, strings.NewReader(tree))
+
+old, cleanup, err = TempCreateChdir(nodes)
+if err != nil {
+  t.Fatal(err)
+}
+defer cleanup()
+```
+
+Also, an example of using it while reading the file system nodes' information from a file is at [the func `TestTreeDiffTimes`](tree_diff_test.go).

@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
@@ -256,21 +255,16 @@ func ExampleTempCreateChdir() {
 		return ""
 	}
 
-	dirs := `
-			2001-01-01T01:01:01Z	0750	a/
-			2001-01-01T01:01:01Z	0750	b/
-			2001-01-01T01:01:01Z	0700	c.txt	"This is a two line\nfile with\ta tab\n"
-			2001-01-01T01:01:01Z	0700	d.txt	No need to quote a single line without tabs
+	lg := log.New(os.Stderr, "ExampleTempCreateChdir", log.LUTC|log.Ldate|log.Ltime)
 
-			2002-01-01T01:01:01Z	0700	"has\ttab/"
-			2002-01-01T01:01:01Z	0700	"has\ttab/e.mb"	"# Markdown...\n\n... also ***possible***\n"
-
-			2002-01-01T01:01:01Z	0700	"\u263asmiles\u263a/"
-		`
-
-	nodes, err := TreeParseReader(strings.NewReader(dirs))
-	if err != nil {
-		log.Fatal(err)
+	nodes := []*Node{
+		&Node{0750, Rfc3339(lg, "2001-01-01T01:01:01Z"), "a/", ""},
+		&Node{0750, Rfc3339(lg, "2001-01-01T01:01:01Z"), "b/", ""},
+		&Node{0700, Rfc3339(lg, "2001-01-01T01:01:01Z"), "c.txt", "This is a two line\nfile with\ta tab\n"},
+		&Node{0700, Rfc3339(lg, "2001-01-01T01:01:01Z"), "d.txt", "A single line without tabs"},
+		&Node{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "has\ttab/", ""},
+		&Node{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "has\ttab/e.mb", "# Markdown...\n\n... also ***possible***\n"},
+		&Node{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "\u263asmiles\u263a/", ""},
 	}
 
 	_, cleanup, err := TempCreateChdir(nodes)

@@ -96,7 +96,7 @@ func parse(line string) (time.Time, os.FileMode, string, string, error) {
 // Field 4: is optional content to be written into the file. It
 // follows the same quotation rules as paths in Field 3.
 // Directory entries ignore Field 4 if present.
-func TreeParseReader(config io.Reader) ([]*Node, error) {
+func ParseReader(f Fatalfable, config io.Reader) []*Node {
 
 	entries := make([]*Node, 0, 10)
 
@@ -108,7 +108,7 @@ func TreeParseReader(config io.Reader) ([]*Node, error) {
 			if _, ok := err.(*emptyErr); ok {
 				continue
 			}
-			return nil, err
+			f.Fatalf("While parsing the file system node string %q: %q", scanner.Text(), err)
 		}
 
 		entries = append(entries, &Node{perm, mt, name, content})
@@ -116,8 +116,8 @@ func TreeParseReader(config io.Reader) ([]*Node, error) {
 
 	err := scanner.Err()
 	if err != nil {
-		return nil, err
+		f.Fatalf("Errored scanning the io.Reader: %q", err)
 	}
 
-	return entries, nil
+	return entries
 }
