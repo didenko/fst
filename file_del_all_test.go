@@ -25,8 +25,12 @@ func TestFileDelAll(t *testing.T) {
 		2018-06-04T08:09:10Z	0750	test/dir/dir/
 		2018-08-06T10:11:12Z	0640	test/dir/dir/text.txt
 	`
-	treeR := strings.NewReader(tree)
-	_, cleanup, err := TempCreateChdir(treeR)
+	nodes, err := TreeParseReader(strings.NewReader(tree))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, cleanup, err := TempCreateChdir(nodes)
 	if err != nil {
 		t.Fatal(err)
 	}

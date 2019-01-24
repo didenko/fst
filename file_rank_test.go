@@ -23,8 +23,12 @@ func TestByContent(t *testing.T) {
 		2017-11-08T23:11:17Z	0700	4_length_a	a 1 b 2 c 3 d 4\n
 		2017-11-08T23:11:17Z	0700	4_length_b	a 1 b 2 c
 	`
-	reader := strings.NewReader(files)
-	_, cleanup, err := TempCreateChdir(reader)
+	nodes, err := TreeParseReader(strings.NewReader(files))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, cleanup, err := TempCreateChdir(nodes)
 	if err != nil {
 		t.Fatal(err)
 	}

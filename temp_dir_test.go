@@ -268,8 +268,12 @@ func ExampleTempCreateChdir() {
 			2002-01-01T01:01:01Z	0700	"\u263asmiles\u263a/"
 		`
 
-	reader := strings.NewReader(dirs)
-	_, cleanup, err := TempCreateChdir(reader)
+	nodes, err := TreeParseReader(strings.NewReader(dirs))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, cleanup, err := TempCreateChdir(nodes)
 	if err != nil {
 		log.Fatal(err)
 	}

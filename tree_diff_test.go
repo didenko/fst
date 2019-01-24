@@ -4,6 +4,7 @@
 package fst // import "go.didenko.com/fst"
 
 import (
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -90,7 +91,12 @@ func TestTreeDiffTimes(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, cleanup, err := TempCreateChdir(mocks)
+	nodes, err := TreeParseReader(mocks)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, cleanup, err := TempCreateChdir(nodes)
 	if err != nil {
 		t.Fatal(err)
 	}

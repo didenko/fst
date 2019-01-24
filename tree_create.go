@@ -15,9 +15,10 @@ type emptyErr struct {
 	error
 }
 
-// TreeCreateFromReader parses a suplied Reader for the tree
-// information and follows the instructions to create files
-// and directories.
+// TreeParseReader parses a suplied Reader for the tree
+// information and constructs a list of filesystem node
+// data suitable to feed into filesystem tree routines
+// in the fst module.
 //
 // The input has line records with three or four fields
 // separated by one or more tabs. White space is trimmed on
@@ -45,12 +46,7 @@ type emptyErr struct {
 // Field 4: is optional content to be written into the file. It
 // follows the same quotation rules as paths in Field 3.
 // Directory entries ignore Field 4 if present.
-//
-// It is up to the caller to deal with conflicting file and
-// directory names in the input. TreeCreateFromReader processes
-// the input line-by-line and will return with error at a first
-// problem it runs into.
-func TreeCreateFromReader(config io.Reader) error {
+func TreeParseReader(config io.Reader) ([]*Node, error) {
 
 	entries := make([]*Node, 0, 10)
 
@@ -62,7 +58,7 @@ func TreeCreateFromReader(config io.Reader) error {
 			if _, ok := err.(*emptyErr); ok {
 				continue
 			}
-			return err
+			return nil, err
 		}
 
 		entries = append(entries, &Node{name, perm, mt, content})
@@ -70,14 +66,20 @@ func TreeCreateFromReader(config io.Reader) error {
 
 	err := scanner.Err()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return TreeCreate(entries)
+	return entries, nil
 }
 
-// TreeCreate Iterates over the channel and creates
-// directories and files
+// TreeCreate creates the filesystem objects provided in the
+// slice of Node pointers, where Nodes describe the objects
+// to be created.
+//
+// It is up to the caller to deal with conflicting file and
+// directory names in the input. TreeCreate processes
+// the input line-by-line and will return with error at a first
+// problem it runs into.
 func TreeCreate(entries []*Node) error {
 
 	dirs := make([]*Node, 0)

@@ -4,7 +4,6 @@
 package fst // import "go.didenko.com/fst"
 
 import (
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -187,14 +186,14 @@ func TempCloneChdir(src string) (string, func(), error) {
 // changes into it, populates it fron the provided `config`
 // as `TreeCreate` would, and returns the old directory name
 // and the cleanup function.
-func TempCreateChdir(config io.Reader) (string, func(), error) {
+func TempCreateChdir(nodes []*Node) (string, func(), error) {
 
 	old, cleanup, err := TempInitChdir()
 	if err != nil {
 		return "", nil, err
 	}
 
-	err = TreeCreateFromReader(config)
+	err = TreeCreate(nodes)
 	if err != nil {
 		cleanup()
 		return "", nil, err

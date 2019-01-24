@@ -36,7 +36,7 @@ As the _TempCloneChdir_ relies on the `TreeCopy` function, it will attempt to re
 
 ### <span id="TempCreateChdir" />[TempCreateChdir](https://godoc.org/go.didenko.com/fst#TempCreateChdir)
 
-The _TempCreateChdir_ function provides an API-like way to create and populate a temporary directory tree for testing. It takes an _io.Reader_, from which is expects to receive lines with ***tab-separated*** fields describing the directories and files to be populated. Here is an example:
+The _TempCreateChdir_ function provides an API-like way to create and populate a temporary directory tree for testing. It takes an _io.Reader_, from which is expects to receive lines with ***tab-separated*** fields describing the directories and files to be populated. Here is an a hypothetical example:
 
 ```go
 tree := `
@@ -44,8 +44,12 @@ tree := `
 2017-11-12T13:14:15Z	0640	settings/theme1.toml	key = val1
 2017-11-12T13:14:15Z	0640	settings/theme2.toml	key = val2
 `
-treeR := strings.NewReader(tree)
-old, cleanup, err = TempCreateChdir(treeR)
+nodes, err := TreeParseReader(strings.NewReader(tree))
+if err != nil {
+  t.Fatal(err)
+}
+
+old, cleanup, err = TempCreateChdir(nodes)
 if err != nil {
   t.Fatal(err)
 }

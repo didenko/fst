@@ -3,9 +3,11 @@
 
 package fst // import "go.didenko.com/fst"
 
-import "testing"
-
-import "strings"
+import (
+	"log"
+	"strings"
+	"testing"
+)
 
 func TestTreeCopy(t *testing.T) {
 
@@ -24,8 +26,12 @@ func TestTreeCopy(t *testing.T) {
 
 		2001-01-01T01:01:01Z	0700	dst/
 	`
-	treeReader := strings.NewReader(tree)
-	_, cleanup, err := TempCreateChdir(treeReader)
+	nodes, err := TreeParseReader(strings.NewReader(tree))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, cleanup, err := TempCreateChdir(nodes)
 	if err != nil {
 		t.Fatal(err)
 	}
