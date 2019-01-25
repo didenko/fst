@@ -65,7 +65,7 @@ func parse(line string) (time.Time, os.FileMode, string, string, error) {
 	return mt, perm, path, content, nil
 }
 
-// TreeParseReader parses a suplied Reader for the tree
+// ParseReader parses a suplied Reader for the tree
 // information and constructs a list of filesystem node
 // data suitable to feed into filesystem tree routines
 // in the fst module.
