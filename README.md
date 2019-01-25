@@ -10,7 +10,7 @@ The suggested package name pronounciation is _"fist"_.
 
 At times it is desireable to test a program behavior which creates or modifies files and directories. Such tests may be quite involved especially if checking permissions or timestamps. A proper cleanup is also considered a nuisance. The whole effort becomes extra burdesome as such filesystem manipulation has to be tested itself - so one ends up with tests of tests.
 
-The `fst` library is a tested set of functions aiming to alleviate the burden. It makes creating and comparing filesystem trees of regular files and directories for testing puposes simple.
+The `fst` (say _fist_) library is a tested set of functions aiming to alleviate the burden. It makes creating and comparing filesystem trees of regular files and directories for testing puposes simple.
 
 ## Highlights
 
@@ -88,7 +88,11 @@ Functions in `fst` expect a reasonably shallow and small directory structures to
 
 If you are concerned that you will hold a few copies of full filenames' lists during the execution, then this library may be a poor match to your needs.
 
-## Version 1 transition
+## History: breaking backward compatibility
+
+### v.1 &rarr; v.2
+
+#### Deprecated `io.Reader` input
 
 Version 1.x of the `fst` package had relied solely on the `io.Reader` interface to feed `fst.TreeCreate` and its derivative funcs with file informaion. While it seemed as a good idea at the time, in practice it provided little utility. With that it had adversely hidden the parsing logic in the `fst.TreeCreate` function.
 
@@ -112,3 +116,47 @@ defer cleanup()
 ```
 
 Also, an example of using it while reading the file system nodes' information from a file is at [the func `TestTreeDiffTimes`](tree_diff_test.go).
+
+#### No-error signatures
+
+In v.1 many user-facing `fst` funcs returned errors to the caller. While following the general coding practice this pattern did not consider the testing nature of the `fst` package. Most `fst` funcs should abort the test when encountering errors because (a) continuing testing on the wrondly setup up data is senseless or (b) cleanup errors indicate failures not caught by the test or a bad setup to begin with. Failing early spares the user from error handling and shortens the trace for error review.
+
+To accommodate this different philosophy, previously error-returning `fst` funcs are stripped of those return values and a first parameter `fst.Fatalfable` interface added. The likes of `testing.T` and `log.Logger` types satisfy `fst.Fatalfable`. The expected pattern is to pass `t` into `fst` funcs, which in a case if error, will call `t.Fatalf` with a reasonable context.
+
+For example:
+
+<table style="text-align: left;">
+<tr style="vertical-align: top;"><th>&nbsp;</th><th>v.1.x</th><th>v.2.x</th><tr>
+<tr style="vertical-align: top;"><th>signature</th>
+<td>
+
+```go
+func FileDelAll(root, name string) error
+```
+
+</td><td>
+
+```go
+func FileDelAll(f Fatalfable, root, name string)
+```
+
+</td></tr>
+<tr style="vertical-align: top;"><th>usage</th>
+<td>
+
+```go
+err = FileDelAll("mock", ".gitkeep")
+if err != nil {
+  t.Fatal(err)
+}
+```
+
+</td><td>
+
+```go
+FileDelAll(t, "mock", ".gitkeep")
+```
+
+</td></tr></table>
+
+<hr />
