@@ -22,10 +22,7 @@ func TestTreeDiff(t *testing.T) {
 	}
 	defer cleanup()
 
-	err = FileDelAll(".", "delete.me")
-	if err != nil {
-		t.Fatal(err)
-	}
+	FileDelAll(t, ".", "delete.me")
 
 	successes := []DiffCase{
 		{"a_same_content", []FileRank{ByName, ByDir, BySize, ByContent(t)}},
