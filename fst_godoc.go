@@ -1,4 +1,4 @@
-// Copyright 2017 Vlad Didenko. All rights reserved.
+// Copyright 2017-2019 Vlad Didenko. All rights reserved.
 // See the included LICENSE.md file for licensing information
 
 // Package fst is a collection of functions to help

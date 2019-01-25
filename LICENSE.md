@@ -1,6 +1,6 @@
 **BSD 3-Clause License**
 
-Copyright &copy; 2017, Vlad Didenko<br />
+Copyright &copy; 2017-2019, Vlad Didenko<br />
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
