@@ -15,33 +15,27 @@ type FileInfoPath struct {
 }
 
 // NewFileInfoPath creates new FileInfoPath struct
-func NewFileInfoPath(path string) (*FileInfoPath, error) {
+func NewFileInfoPath(f Fatalfable, path string) *FileInfoPath {
 	fi, err := os.Stat(path)
 	if err != nil {
-		return &FileInfoPath{nil, path}, err
+		f.Fatalf("While getting file %q info: %q", path, err)
 	}
 
-	return &FileInfoPath{fi, path}, nil
+	return &FileInfoPath{fi, path}
 }
 
 // MakeFipSlice creates a slice of *FileInfoPaths based on
-// provided list of file names. It returns the first
+// provided list of file names. It fails on the first
 // encountered error.
-func MakeFipSlice(files ...string) ([]*FileInfoPath, error) {
+func MakeFipSlice(f Fatalfable, files ...string) []*FileInfoPath {
 
-	fips := make([]*FileInfoPath, 0)
+	fips := make([]*FileInfoPath, len(files))
 
-	for _, name := range files {
-
-		fip, err := NewFileInfoPath(name)
-		if err != nil {
-			return nil, err
-		}
-
-		fips = append(fips, fip)
+	for i, name := range files {
+		fips[i] = NewFileInfoPath(f, name)
 	}
 
-	return fips, nil
+	return fips
 }
 
 // Path returns the stored full path in the FileInfoPath struct

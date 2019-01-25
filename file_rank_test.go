@@ -31,15 +31,13 @@ func TestByContent(t *testing.T) {
 
 	less := ByContent(t)
 
-	fips, err := MakeFipSlice(
+	fips := MakeFipSlice(
+		t,
 		"1_same_a", "1_same_b",
 		"2_diff_a", "2_diff_b",
 		"3_empty_a", "3_empty_b",
 		"4_length_a", "4_length_b",
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	if less(fips[0], fips[1]) {
 		t.Errorf("Files %v and %v with same content ranked as ordered\n", fips[0].Name(), fips[1].Name())
