@@ -32,10 +32,7 @@ func TestFileDelAll(t *testing.T) {
 
 	FileDelAll(t, "mock", ".gitkeep")
 
-	diffs, err := TreeDiff(t, "mock", "test", ByName, ByDir, BySize)
-	if err != nil {
-		t.Fatal(err)
-	}
+	diffs := TreeDiff(t, "mock", "test", ByName, ByDir, BySize)
 
 	if len(diffs) > 0 {
 		t.Errorf("Tree foes not match expected after FileDelAll:\n%v\n", diffs)

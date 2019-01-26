@@ -154,10 +154,7 @@ func TestTempCloneDir(t *testing.T) {
 		t.Errorf("Returned temporary path \"%s\" is not a directory", testRootDir)
 	}
 
-	diffs, err := TreeDiff(t, src, testRootDir, ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t))
-	if err != nil {
-		t.Fatalf("Diffing the trees %q and %q: %s", src, testRootDir, err)
-	}
+	diffs := TreeDiff(t, src, testRootDir, ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t))
 
 	if diffs != nil {
 		t.Errorf("Trees at \"%s\" and \"%s\" differ unexpectedly: %v", src, testRootDir, diffs)
@@ -200,10 +197,7 @@ func TestTempCloneChdir(t *testing.T) {
 
 	src = filepath.Join(origWD, src)
 
-	diffs, err := TreeDiff(t, src, tempWD, ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t))
-	if err != nil {
-		t.Fatal(err)
-	}
+	diffs := TreeDiff(t, src, tempWD, ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t))
 
 	if diffs != nil {
 		t.Errorf("Trees at \"%s\" and \"%s\" differ unexpectedly: %v", src, tempWD, diffs)
