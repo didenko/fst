@@ -62,10 +62,7 @@ func TestTreeCreateFromReader(t *testing.T) {
 		{time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "aaa/bbb", ""},
 	}
 
-	_, cleanup, err := TempInitChdir()
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, cleanup := TempInitChdir(t)
 	defer cleanup()
 
 	TreeCreate(t, nodes)
@@ -114,10 +111,7 @@ func TestTreeCreateApi(t *testing.T) {
 		{time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), 0700, "aaa/bbb", ""},
 	}
 
-	_, cleanup, err := TempInitChdir()
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, cleanup := TempInitChdir(t)
 	defer cleanup()
 
 	TreeCreate(t, items)

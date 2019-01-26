@@ -89,10 +89,7 @@ func TestTreeDiffTimes(t *testing.T) {
 
 	nodes := ParseReader(t, mocks)
 
-	_, cleanup, err := TempCreateChdir(t, nodes)
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, cleanup := TempCreateChdir(t, nodes)
 	defer cleanup()
 
 	diffs, err := TreeDiff("a_same_times/a", "a_same_times/b", ByName, ByTime)

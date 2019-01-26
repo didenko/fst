@@ -23,10 +23,7 @@ func TestByContent(t *testing.T) {
 		&Node{0700, Rfc3339(t, "2017-11-08T23:11:17Z"), "4_length_b", "a 1 b 2 c"},
 	}
 
-	_, cleanup, err := TempCreateChdir(t, files)
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, cleanup := TempCreateChdir(t, files)
 	defer cleanup()
 
 	less := ByContent(t)

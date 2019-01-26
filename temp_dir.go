@@ -5,7 +5,6 @@ package fst // import "go.didenko.com/fst"
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -27,11 +26,11 @@ import (
 // directory, then the returned directory name is empty,
 // cleanup funcion is nil, and the temp folder is
 // expected to be already removed.
-func TempInitDir() (string, func(), error) {
+func TempInitDir(f Fatalfable) (string, func()) {
 	root, err := ioutil.TempDir("", "")
 	if err != nil {
 		os.RemoveAll(root)
-		return "", nil, err
+		f.Fatalf("Creating a temp directory: %s", err)
 	}
 
 	return root, func() {
@@ -55,16 +54,16 @@ func TempInitDir() (string, func(), error) {
 			})
 
 		if err != nil {
-			log.Fatalln(err)
+			f.Fatalf("In the file cleanup: %s", err)
 		}
 
 		for i := len(dirs) - 1; i >= 0; i-- {
 			err = os.RemoveAll(dirs[i])
 			if err != nil {
-				log.Fatalln(err)
+				f.Fatalf("In the directory cleanup: %s", err)
 			}
 		}
-	}, nil
+	}
 }
 
 // TempInitChdir creates a temporary directory in the same
@@ -79,30 +78,26 @@ func TempInitDir() (string, func(), error) {
 // directory and to delete the temporary directory
 //
 // 3. an error
-func TempInitChdir() (string, func(), error) {
-	root, cleanup, err := TempInitDir()
-	if err != nil {
-		return "", nil, err
-	}
+func TempInitChdir(f Fatalfable) (string, func()) {
+	root, cleanup := TempInitDir(f)
 
 	wd, err := os.Getwd()
 	if err != nil {
 		cleanup()
-		return "", nil, err
+		f.Fatalf("Working directory indetermined: %s", err)
 	}
 
 	err = os.Chdir(root)
 	if err != nil {
 		cleanup()
-		return "", nil, err
+		f.Fatalf("Changing to the temporary directory %q: %s", root, err)
 	}
 
 	return wd,
 		func() {
 			os.Chdir(wd)
 			cleanup()
-		},
-		nil
+		}
 }
 
 // TempCloneDir function creates a copy of an existing
@@ -128,15 +123,10 @@ func TempInitChdir() (string, func(), error) {
 // If, however, the user does not have read permission
 // for a file, or read+execute permission for a directory,
 // then the clone process will naturally fail.
-func TempCloneDir(f Fatalfable, src string) (string, func(), error) {
-	root, cleanup, err := TempInitDir()
-	if err != nil {
-		return "", nil, err
-	}
-
+func TempCloneDir(f Fatalfable, src string) (string, func()) {
+	root, cleanup := TempInitDir(f)
 	TreeCopy(newFatalCleaner(f, cleanup), src, root)
-
-	return root, cleanup, nil
+	return root, cleanup
 }
 
 // TempCloneChdir clones a temporary directory in the same
@@ -152,21 +142,18 @@ func TempCloneDir(f Fatalfable, src string) (string, func(), error) {
 //
 // 3. an error
 func TempCloneChdir(f Fatalfable, src string) (string, func(), error) {
-	root, cleanup, err := TempCloneDir(f, src)
-	if err != nil {
-		return "", nil, err
-	}
+	root, cleanup := TempCloneDir(f, src)
 
 	wd, err := os.Getwd()
 	if err != nil {
 		cleanup()
-		return "", nil, err
+		f.Fatalf("Working directory indetermined: %s", err)
 	}
 
 	err = os.Chdir(root)
 	if err != nil {
 		cleanup()
-		return "", nil, err
+		f.Fatalf("Changing to the temporary directory %q: %s", root, err)
 	}
 
 	return wd,
@@ -182,14 +169,8 @@ func TempCloneChdir(f Fatalfable, src string) (string, func(), error) {
 // changes into it, populates it fron the provided `config`
 // as `TreeCreate` would, and returns the old directory name
 // and the cleanup function.
-func TempCreateChdir(f Fatalfable, nodes []*Node) (string, func(), error) {
-
-	old, cleanup, err := TempInitChdir()
-	if err != nil {
-		return "", nil, err
-	}
-
+func TempCreateChdir(f Fatalfable, nodes []*Node) (string, func()) {
+	old, cleanup := TempInitChdir(f)
 	TreeCreate(newFatalCleaner(f, cleanup), nodes)
-
-	return old, cleanup, nil
+	return old, cleanup
 }

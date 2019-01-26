@@ -21,10 +21,7 @@ func TestTreeCopy(t *testing.T) {
 		&Node{0700, Rfc3339(t, "2001-01-01T01:01:01Z"), "dst/", ""},
 	}
 
-	_, cleanup, err := TempCreateChdir(t, nodes)
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, cleanup := TempCreateChdir(t, nodes)
 	defer cleanup()
 
 	TreeCopy(t, "src", "dst")
