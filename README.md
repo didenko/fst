@@ -21,7 +21,7 @@ The three most used functtions in the `fst` library are [_TempCloneChdir_](#Temp
 TempCloneChdir is intended to clone an existing directory with all its content, permissions, and timestamps. Consider this example:
 
 ```go
-old, cleanup := TempCloneChdir(t, "mock")
+old, cleanup := fst.TempCloneChdir(t, "mock")
 defer cleanup()
 ```
 
@@ -87,9 +87,9 @@ If you are concerned that you will hold a few copies of full file information li
 
 #### No-error signatures
 
-In v.1 many user-facing `fst` funcs returned errors to the caller. While following the general coding practice this pattern did not consider the testing nature of the `fst` package. Most `fst` funcs should abort the test when encountering errors because (a) continuing testing on the wrondly setup up data is senseless or (b) cleanup errors indicate failures not caught by the test or a bad setup to begin with. Failing early spares the user from error handling and shortens the trace for error review.
+In v.1 many user-facing `fst` funcs returned errors to the caller. While following the general coding practice this pattern did not consider the testing nature of the `fst` package. Most `fst` funcs should abort the test when encountering errors because (a) continuing testing on the wrondly set up data is senseless or (b) cleanup errors indicate failures not caught by the test or a bad setup to begin with. Failing early spares the user from error handling and shortens the trace output for error review.
 
-To accommodate this different philosophy, previously error-returning `fst` funcs are stripped of those return values and a first parameter `fst.Fatalfable` interface added. The likes of `testing.T` and `log.Logger` types satisfy `fst.Fatalfable`. The expected pattern is to pass `t` into `fst` funcs, which in a case if error, will call `t.Fatalf` with a reasonable context.
+To accommodate this different philosophy, previously error-returning `fst` funcs are stripped of those return values and a first parameter `fst.Fatalfable` interface added. The likes of `testing.T` and `log.Logger` types satisfy `fst.Fatalfable`. The expected pattern is to pass `t` into `fst` funcs which will call `t.Fatalf` with a reasonable context in a case of an error.
 
 For example:
 
@@ -113,7 +113,7 @@ func FileDelAll(f Fatalfable, root, name string)
 <td>
 
 ```go
-err = FileDelAll("mock", ".gitkeep")
+err = fst.FileDelAll("mock", ".gitkeep")
 if err != nil {
   t.Fatal(err)
 }
@@ -122,7 +122,7 @@ if err != nil {
 </td><td>
 
 ```go
-FileDelAll(t, "mock", ".gitkeep")
+fst.FileDelAll(t, "mock", ".gitkeep")
 ```
 
 </td></tr></table>
@@ -131,9 +131,9 @@ FileDelAll(t, "mock", ".gitkeep")
 
 Version 1.x of the `fst` package had relied solely on the `io.Reader` interface to feed `fst.TreeCreate` and its derivative funcs with file informaion. While it seemed as a good idea at the time, in practice it provided little utility. With that it had adversely hidden the parsing logic in the `fst.TreeCreate` function.
 
-Versions 2.x breaks the compatibility: instead of `io.Reader` those funcs now expect a `[]*Node` - thus allowing better checks at compile time and better testing of the `fst` package.
+Versions 2.x breaks the compatibility: instead of `io.Reader` those funcs now expect `[]*Node` - thus allowing better checks at compile time and better testing of the `fst` package.
 
-The provided func `fst.ParseReader` simplifies transition form Version 1.x. It has the parsing logic extracted from `fst.TreeCreate`. Here is an example of using it:
+The provided func `fst.ParseReader` simplifies transition from Version 1.x. It has the parsing logic extracted from `fst.TreeCreate`. Here is an example of using it:
 
 ```go
 tree := `
@@ -141,15 +141,12 @@ tree := `
 2017-11-12T13:14:15Z	0640	settings/theme1.toml	key = val1
 2017-11-12T13:14:15Z	0640	settings/theme2.toml	key = val2
 `
-nodes := TreeParseReader(t, strings.NewReader(tree))
+nodes := fst.ParseReader(t, strings.NewReader(tree))
 
-old, cleanup, err = TempCreateChdir(nodes)
-if err != nil {
-  t.Fatal(err)
-}
+old, cleanup := fst.TempCreateChdir(t, nodes)
 defer cleanup()
 ```
 
-Also, an example of using it while reading the file system nodes' information from a file is at [the func `TestTreeDiffTimes`](tree_diff_test.go).
+Also, see an example of using it while reading the file system nodes' information from a file at [the func `TestTreeDiffTimes`](tree_diff_test.go).
 
 <hr />
