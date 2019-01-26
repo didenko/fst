@@ -8,7 +8,7 @@ The suggested package name pronounciation is _"fist"_.
 
 ## Purpose
 
-At times it is desireable to test a program behavior which creates or modifies files and directories. Such tests may be quite involved especially if checking permissions or timestamps. A proper cleanup is also considered a nuisance. The whole effort becomes extra burdesome as such filesystem manipulation has to be tested itself - so one ends up with tests of tests.
+Sometimes it is desireable to test a program behavior which creates or modifies files and directories. Such tests may be quite involved especially if checking permissions or timestamps. A proper cleanup is also considered a nuisance. The whole effort becomes extra burdesome as such filesystem manipulation has to be tested itself - so one ends up with tests of tests.
 
 The `fst` library is a tested set of functions aiming to alleviate the burden. It makes creating and comparing filesystem trees of regular files and directories for testing puposes simple.
 
@@ -18,25 +18,24 @@ The three most used functtions in the `fst` library are [_TempCloneChdir_](#Temp
 
 ### <span id="TempCloneChdir" />[TempCloneChdir](https://godoc.org/go.didenko.com/fst#TempCloneDir)
 
-It is used to clone an existing directory with all it's content, permissions, and timestamps. Consider this example:
+TempCloneChdir is intended to clone an existing directory with all its content, permissions, and timestamps. Consider this example:
 
 ```go
-old, cleanup, err := TempCloneChdir("mock")
-if err != nil {
-  t.Fatal(err)
-}
+old, cleanup := TempCloneChdir(t, "mock")
 defer cleanup()
 ```
 
-If an error was returned, then no temporary directory was left behind (after a reasonable cleanup effort). Otherwise, the _mock_ directory's content will be cloned into a new temporary directory and the calling process will change into it. The _old_ variable in the example will contain the original directory where the running process was at the time of the _TempCloneChdir_ call.
+If the operation failed then (a) no temporary directory was left behind after a reasonable cleanup effort and (b) the `t.Fatalf(...)` was called.
+
+If the operation succeded then the _mock_ directory's content is be cloned into a new temporary directory and the calling process will change working directory into it. The _old_ variable in the example will contain the original directory where the running process was at the time of the _TempCloneChdir_ call.
 
 The ***cleanup*** function has the code to change back to the original directory and then delete the temporary directory.
 
-As the _TempCloneChdir_ relies on the `TreeCopy` function, it will attempt to recreate both permissions and timestamps from the source directory. Keep in mind, that popular version control systems like _Git_ and _Mercurial_ do not preserve original files' timestamps. If your tests rely on timestamped files or directories then _TreeCreate_ or it's derivative _TempCreateChdir_ functions are your friends.
+As the _TempCloneChdir_ relies on the `TreeCopy` function, it will attempt to recreate both permissions and timestamps from the source directory. Keep in mind, that popular version control systems like _Git_ and _Mercurial_ do not preserve original files' timestamps. If your tests rely on timestamped files or directories then _TreeCreate_ or its derivative _TempCreateChdir_ functions are your friends.
 
 ### <span id="TempCreateChdir" />[TempCreateChdir](https://godoc.org/go.didenko.com/fst#TempCreateChdir)
 
-The _TempCreateChdir_ function provides an API-like way to create and populate a temporary directory tree for testing. It takes an _io.Reader_, from which is expects to receive lines with ***tab-separated*** fields describing the directories and files to be populated. Here is an a hypothetical example:
+The _TempCreateChdir_ function provides an API-like way to create and populate a temporary directory tree for testing. It takes a slice of `Node` pointers, from which it expects to receive data describing the directories and files to be populated. Here is an a hypothetical example:
 
 ```go
 nodes := []*fst.Node{
@@ -45,16 +44,13 @@ nodes := []*fst.Node{
   &fst.Node{0640, fst.Rfc3339(t, "2017-11-12T13:14:15Z"), "settings/theme2.toml", "key = val2"},
 }
 
-old, cleanup, err = fst.TempCreateChdir(nodes)
-if err != nil {
-  t.Fatal(err)
-}
+old, cleanup := fst.TempCreateChdir(t, nodes)
 defer cleanup()
 ```
 
-If there is no error, _TempCreateChdir_ will create the `settings` directory  with files `theme1.toml` and `theme2.toml`, with the specified key/value pairs as content in a new directory.
+If there was no failure then _TempCreateChdir_ will create the `settings` directory  with files `theme1.toml` and `theme2.toml`, with the specified key/value pairs as content in the `settings` directory.
 
-The _TempCreateChdir_ function removes the temporary directory it creates as a part of the cleanup logic. It also does a best-effort attempt to remove the directory is an error occurred during it's operation.
+As a part of the cleanup logic the _TempCreateChdir_ function removes the temporary directory it created. It also does a best-effort attempt to remove the temporary directory if it failed during its operation, while also calling `t.Fatalf(...)`.
 
 ### <span id="TreeDiff" />[_TreeDiff_](https://godoc.org/go.didenko.com/fst#TreeDiff)
 
@@ -65,57 +61,29 @@ Criteria for comparing filesystem objects varies based on a task, so _TreeDiff_ 
 A quick example of a common _TreeDiff_ use:
 
 ```go
-diffs, err := fst.TreeDiff(
+diffs:= fst.TreeDiff(
+  t,
   "dir1", "dir2",
   fst.ByName, fst.ByDir, fst.BySize, fst.ByContent(t))
-
-if err != nil {
-  t.Fatal(err)
-}
 
 if diffs != nil {
   t.Logf("Differences between dir1 and dir2:\n%v\n", diffs)
 }
 ```
 
-Note, that while the _BySize_ comparator is redundant in presense of the _ByContent_ comparator, in most cases the cheaper size comparison will avoid a more expensive content comparison. The comparator order is significant, because once an earlier comparator returns `true`, the later comparators are not run.
+Note, that while the _BySize_ comparator is redundant in presense of the _ByContent_ comparator, in most cases the cheaper size comparison will avoid a more expensive content comparison. The comparator order is significant, because once an earlier comparator returns `true`, the later comparators do not run.
 
-It is easy to provide overly restrictive permissions using the tree cloning and tree creation functions. When unable to access needed information, _TreeDiff_ will return a related error. While specifics may vary it is often safest to set user read and execute permissions for directories and user read permission for files.
+It is easy to provide overly restrictive permissions using the tree cloning and tree creation functions. When unable to access needed information, _TreeDiff_ will call `t.Fatalf(...)` with a related diagnostic. While specifics may vary it is often safest to set user read and execute permissions for directories and user read permission for files.
 
 ## Limitations
 
-Functions in `fst` expect a reasonably shallow and small directory structures to deal with, as that is what usually happens in testing. During build-up, tear-down, and comparisons it creates collections of filesystem object names in memory. It is not necessarily efficient but allows for more graceful permissions handling.
+Functions in `fst` expect a reasonably shallow and small directory structures to deal with, as that is what usually happens in testing. During build-up, tear-down, and comparisons they create collections of filesystem information objects in memory. It is not necessarily the most efficient way, but it allows for more graceful permissions handling.
 
-If you are concerned that you will hold a few copies of full filenames' lists during the execution, then this library may be a poor match to your needs.
+If you are concerned that you will hold a few copies of full file information lists during the execution, then this library may be a poor match to your needs.
 
 ## History: breaking backward compatibility
 
 ### v.1 &rarr; v.2
-
-#### Deprecated `io.Reader` input
-
-Version 1.x of the `fst` package had relied solely on the `io.Reader` interface to feed `fst.TreeCreate` and its derivative funcs with file informaion. While it seemed as a good idea at the time, in practice it provided little utility. With that it had adversely hidden the parsing logic in the `fst.TreeCreate` function.
-
-Versions 2.x breaks the compatibility: instead of `io.Reader` those funcs now expect a `[]*Node` - thus allowing better checks at compile time and better testing of the `fst` package.
-
-The provided func `fst.ParseReader` simplifies transition form Version 1.x. It has the parsing logic extracted from `fst.TreeCreate`. Here is an example of using it:
-
-```go
-tree := `
-2017-11-12T13:14:15Z	0750	settings/
-2017-11-12T13:14:15Z	0640	settings/theme1.toml	key = val1
-2017-11-12T13:14:15Z	0640	settings/theme2.toml	key = val2
-`
-nodes := TreeParseReader(t, strings.NewReader(tree))
-
-old, cleanup, err = TempCreateChdir(nodes)
-if err != nil {
-  t.Fatal(err)
-}
-defer cleanup()
-```
-
-Also, an example of using it while reading the file system nodes' information from a file is at [the func `TestTreeDiffTimes`](tree_diff_test.go).
 
 #### No-error signatures
 
@@ -158,5 +126,30 @@ FileDelAll(t, "mock", ".gitkeep")
 ```
 
 </td></tr></table>
+
+#### Deprecated `io.Reader` input
+
+Version 1.x of the `fst` package had relied solely on the `io.Reader` interface to feed `fst.TreeCreate` and its derivative funcs with file informaion. While it seemed as a good idea at the time, in practice it provided little utility. With that it had adversely hidden the parsing logic in the `fst.TreeCreate` function.
+
+Versions 2.x breaks the compatibility: instead of `io.Reader` those funcs now expect a `[]*Node` - thus allowing better checks at compile time and better testing of the `fst` package.
+
+The provided func `fst.ParseReader` simplifies transition form Version 1.x. It has the parsing logic extracted from `fst.TreeCreate`. Here is an example of using it:
+
+```go
+tree := `
+2017-11-12T13:14:15Z	0750	settings/
+2017-11-12T13:14:15Z	0640	settings/theme1.toml	key = val1
+2017-11-12T13:14:15Z	0640	settings/theme2.toml	key = val2
+`
+nodes := TreeParseReader(t, strings.NewReader(tree))
+
+old, cleanup, err = TempCreateChdir(nodes)
+if err != nil {
+  t.Fatal(err)
+}
+defer cleanup()
+```
+
+Also, an example of using it while reading the file system nodes' information from a file is at [the func `TestTreeDiffTimes`](tree_diff_test.go).
 
 <hr />
