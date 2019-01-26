@@ -186,10 +186,7 @@ func TestTempCloneChdir(t *testing.T) {
 	src := "./testdata/temp_dir_mocks"
 
 	// Get the values and clone the test root dir to be tested
-	old, cleanup, err := TempCloneChdir(t, src)
-	if err != nil {
-		t.Fatal(err)
-	}
+	old, cleanup := TempCloneChdir(t, src)
 
 	if origWD != old {
 		t.Fatalf("Got \"%s\" as an old directory instead of the expected \"%s\"\n", old, origWD)

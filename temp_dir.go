@@ -141,7 +141,7 @@ func TempCloneDir(f Fatalfable, src string) (string, func()) {
 // directory and to delete the temporary directory
 //
 // 3. an error
-func TempCloneChdir(f Fatalfable, src string) (string, func(), error) {
+func TempCloneChdir(f Fatalfable, src string) (string, func()) {
 	root, cleanup := TempCloneDir(f, src)
 
 	wd, err := os.Getwd()
@@ -160,8 +160,7 @@ func TempCloneChdir(f Fatalfable, src string) (string, func(), error) {
 		func() {
 			os.Chdir(wd)
 			cleanup()
-		},
-		nil
+		}
 }
 
 // TempCreateChdir is a combination of `TempInitChdir` and
