@@ -19,25 +19,17 @@ type Node struct {
 
 // SaveAttributes sets the named file's permissions and
 // timestamps to the ones from the node.
-func (n *Node) SaveAttributes() error {
+func (n *Node) SaveAttributes(f Fatalfable) {
 
 	err := os.Chmod(n.name, n.perm)
 	if err != nil {
-		return err
+		f.Fatalf("Setting %q permissions to %o: %q", n.name, n.perm, err)
 	}
 
 	err = os.Chtimes(n.name, n.time, n.time)
 	if err != nil {
-		return err
+		f.Fatalf("Setting %q timestamps to %s: %q", n.name, n.time, err)
 	}
-
-	return nil
-}
-
-// Fatalfable is an interface to any type containing a common
-// Fatalf method, as the likes of testing.T and log.Logger.
-type Fatalfable interface {
-	Fatalf(format string, v ...interface{})
 }
 
 // Rfc3339 converts a string to a time struct while assuming

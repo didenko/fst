@@ -14,48 +14,41 @@ import (
 // directory names in the input. TreeCreate processes
 // the input line-by-line and will return with error at a first
 // problem it runs into.
-func TreeCreate(entries []*Node) error {
-
+func TreeCreate(f Fatalfable, entries []*Node) {
 	dirs := make([]*Node, 0)
 
 	for _, e := range entries {
 
 		if e.name[len(e.name)-1] == '/' {
 			if err := os.Mkdir(e.name[:len(e.name)-1], 0700); err != nil {
-				return err
+				f.Fatalf("While making dir %q: %s", e.name, err)
 			}
 
 			dirs = append(dirs, e)
 			continue
 		}
 
-		f, err := os.Create(e.name)
+		fl, err := os.Create(e.name)
 		if err != nil {
-			return err
+			f.Fatalf("While creating the file %q: %s", e.name, err)
 		}
 
 		if len(e.body) > 0 {
-			_, err = f.WriteString(e.body)
+			_, err = fl.WriteString(e.body)
 			if err != nil {
-				return err
+				f.Fatalf("While writing file %q content: %s", e.name, err)
 			}
 		}
 
-		err = f.Close()
+		err = fl.Close()
 		if err != nil {
-			return err
+			f.Fatalf("While colsing file %q: %s", e.name, err)
 		}
 
-		if err = e.SaveAttributes(); err != nil {
-			return err
-		}
+		e.SaveAttributes(f)
 	}
 
 	for i := len(dirs) - 1; i >= 0; i-- {
-		if err := dirs[i].SaveAttributes(); err != nil {
-			return err
-		}
+		dirs[i].SaveAttributes(f)
 	}
-
-	return nil
 }

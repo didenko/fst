@@ -10,7 +10,7 @@ The suggested package name pronounciation is _"fist"_.
 
 At times it is desireable to test a program behavior which creates or modifies files and directories. Such tests may be quite involved especially if checking permissions or timestamps. A proper cleanup is also considered a nuisance. The whole effort becomes extra burdesome as such filesystem manipulation has to be tested itself - so one ends up with tests of tests.
 
-The `fst` (say _fist_) library is a tested set of functions aiming to alleviate the burden. It makes creating and comparing filesystem trees of regular files and directories for testing puposes simple.
+The `fst` library is a tested set of functions aiming to alleviate the burden. It makes creating and comparing filesystem trees of regular files and directories for testing puposes simple.
 
 ## Highlights
 

@@ -186,18 +186,14 @@ func TempCloneChdir(src string) (string, func(), error) {
 // changes into it, populates it fron the provided `config`
 // as `TreeCreate` would, and returns the old directory name
 // and the cleanup function.
-func TempCreateChdir(nodes []*Node) (string, func(), error) {
+func TempCreateChdir(f Fatalfable, nodes []*Node) (string, func(), error) {
 
 	old, cleanup, err := TempInitChdir()
 	if err != nil {
 		return "", nil, err
 	}
 
-	err = TreeCreate(nodes)
-	if err != nil {
-		cleanup()
-		return "", nil, err
-	}
+	TreeCreate(newFatalCleaner(f, cleanup), nodes)
 
 	return old, cleanup, nil
 }

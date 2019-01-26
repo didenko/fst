@@ -267,7 +267,7 @@ func ExampleTempCreateChdir() {
 		&Node{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "\u263asmiles\u263a/", ""},
 	}
 
-	_, cleanup, err := TempCreateChdir(nodes)
+	_, cleanup, err := TempCreateChdir(lg, nodes)
 	if err != nil {
 		log.Fatal(err)
 	}

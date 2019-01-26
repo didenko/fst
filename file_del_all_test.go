@@ -27,7 +27,7 @@ func TestFileDelAll(t *testing.T) {
 		&Node{0640, Rfc3339(t, "2018-08-06T10:11:12Z"), "test/dir/dir/text.txt", ""},
 	}
 
-	_, cleanup, err := TempCreateChdir(nodes)
+	_, cleanup, err := TempCreateChdir(t, nodes)
 	if err != nil {
 		t.Fatal(err)
 	}

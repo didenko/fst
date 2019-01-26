@@ -68,10 +68,7 @@ func TestTreeCreateFromReader(t *testing.T) {
 	}
 	defer cleanup()
 
-	err = TreeCreate(nodes)
-	if err != nil {
-		t.Fatal(err)
-	}
+	TreeCreate(t, nodes)
 
 	files, err := ioutil.ReadDir(".")
 	if err != nil {
@@ -123,10 +120,7 @@ func TestTreeCreateApi(t *testing.T) {
 	}
 	defer cleanup()
 
-	err = TreeCreate(items)
-	if err != nil {
-		t.Fatal(err)
-	}
+	TreeCreate(t, items)
 
 	files, err := ioutil.ReadDir(".")
 	if err != nil {
