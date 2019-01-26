@@ -32,7 +32,7 @@ func TestFileDelAll(t *testing.T) {
 
 	FileDelAll(t, "mock", ".gitkeep")
 
-	diffs, err := TreeDiff("mock", "test", ByName, ByDir, BySize)
+	diffs, err := TreeDiff(t, "mock", "test", ByName, ByDir, BySize)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -16,17 +16,10 @@ import (
 // By the variadic slice of FileRank functions, like the
 // ones in this package. A commonly used set of comparators
 // is ByName, ByDir, BySize, and ByContent
-func TreeDiff(a string, b string, comps ...FileRank) ([]string, error) {
+func TreeDiff(f Fatalfable, a string, b string, comps ...FileRank) ([]string, error) {
 
-	listA, err := collectFileInfo(a)
-	if err != nil {
-		return nil, err
-	}
-
-	listB, err := collectFileInfo(b)
-	if err != nil {
-		return nil, err
-	}
+	listA := collectFileInfo(f, a)
+	listB := collectFileInfo(f, b)
 
 	onlyA, onlyB := collectDifferent(listA, listB, comps...)
 
@@ -79,7 +72,7 @@ func collectDifferent(left, right []*FileInfoPath, comps ...FileRank) (onlyLeft,
 	return onlyLeft, onlyRight
 }
 
-func collectFileInfo(dir string) ([]*FileInfoPath, error) {
+func collectFileInfo(f Fatalfable, dir string) []*FileInfoPath {
 
 	list := make([]*FileInfoPath, 0)
 
@@ -90,5 +83,8 @@ func collectFileInfo(dir string) ([]*FileInfoPath, error) {
 		return err
 	})
 
-	return list, err
+	if err != nil {
+		f.Fatalf("Collecting file info in the tree %q: %s", dir, err)
+	}
+	return list
 }
