@@ -4,6 +4,7 @@
 package fst // import "go.didenko.com/fst"
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 // TreeCopy duplicates redular files and directories from
 // inside the source directory into an existing destination
 // directory.
-func TreeCopy(src, dst string) error {
+func TreeCopy(f Fatalfable, src, dst string) {
 
 	srcClean := filepath.Clean(src)
 	srcLen := len(srcClean)
@@ -32,61 +33,67 @@ func TreeCopy(src, dst string) error {
 
 				srcf, err := os.Open(fn)
 				if err != nil {
-					return err
+					return fmt.Errorf("Opening the sorce file %q: %s", fn, err)
 				}
 
 				dstf, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0600)
 				if err != nil {
-					return err
+					return fmt.Errorf("Opening the dest file %q: %s", dest, err)
 				}
 
 				_, err = io.Copy(dstf, srcf)
 				if err != nil {
-					return err
+					return fmt.Errorf("Copying %q to %q: %s", fn, dest, err)
 				}
 
 				err = srcf.Close()
 				if err != nil {
-					return err
+					return fmt.Errorf("Closing the sorce file %q: %s", fn, err)
 				}
 
 				err = dstf.Close()
 				if err != nil {
-					return err
+					return fmt.Errorf("Closing the dest file %q: %s", dest, err)
 				}
 
 				err = os.Chmod(dest, fi.Mode())
 				if err != nil {
-					return err
+					return fmt.Errorf("Setting permissions on %q: %s", dest, err)
 				}
 
 				destMT := fi.ModTime()
-				return os.Chtimes(dest, destMT, destMT)
+				err = os.Chtimes(dest, destMT, destMT)
+				if err != nil {
+					return fmt.Errorf("Setting timestamp %s on %q: %s", destMT, dest, err)
+				}
+
+				return nil
 			}
 
 			if fi.Mode().IsDir() {
 
 				dirs = append(dirs, &Node{fi.Mode().Perm(), fi.ModTime(), dest, ""})
-				return os.Mkdir(dest, 0700)
+				err := os.Mkdir(dest, 0700)
+				if err != nil {
+					return fmt.Errorf("Creating dir %q: %s", dest, err)
+				}
 			}
 			return nil
 		})
 
 	if err != nil {
-		return err
+		f.Fatalf("Copying tree from %q to %q: %s", src, dst, err)
 	}
 
 	for i := len(dirs) - 1; i >= 0; i-- {
 		err := os.Chmod(dirs[i].name, dirs[i].perm)
 		if err != nil {
-			return err
+			f.Fatalf("Setting permissions on %q to %o: %s", dirs[i].name, dirs[i].perm, err)
 		}
 
 		err = os.Chtimes(dirs[i].name, dirs[i].time, dirs[i].time)
 		if err != nil {
-			return err
+			f.Fatalf("Setting timestamp %s on %q: %s", dirs[i].time, dirs[i].name, err)
 		}
 	}
-
-	return nil
 }

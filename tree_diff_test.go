@@ -16,7 +16,7 @@ type DiffCase struct {
 
 func TestTreeDiff(t *testing.T) {
 
-	_, cleanup, err := TempCloneChdir("testdata/tree_diff_mocks")
+	_, cleanup, err := TempCloneChdir(t, "testdata/tree_diff_mocks")
 	if err != nil {
 		t.Fatal(err)
 	}

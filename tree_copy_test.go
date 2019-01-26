@@ -27,10 +27,7 @@ func TestTreeCopy(t *testing.T) {
 	}
 	defer cleanup()
 
-	err = TreeCopy("src", "dst")
-	if err != nil {
-		t.Fatal(err)
-	}
+	TreeCopy(t, "src", "dst")
 
 	diffs, err := TreeDiff("src", "dst", ByName, ByDir, BySize, ByPerm, ByTime, ByContent(t))
 	if err != nil {

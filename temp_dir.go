@@ -128,17 +128,13 @@ func TempInitChdir() (string, func(), error) {
 // If, however, the user does not have read permission
 // for a file, or read+execute permission for a directory,
 // then the clone process will naturally fail.
-func TempCloneDir(src string) (string, func(), error) {
+func TempCloneDir(f Fatalfable, src string) (string, func(), error) {
 	root, cleanup, err := TempInitDir()
 	if err != nil {
 		return "", nil, err
 	}
 
-	err = TreeCopy(src, root)
-	if err != nil {
-		cleanup()
-		return "", nil, err
-	}
+	TreeCopy(newFatalCleaner(f, cleanup), src, root)
 
 	return root, cleanup, nil
 }
@@ -155,8 +151,8 @@ func TempCloneDir(src string) (string, func(), error) {
 // directory and to delete the temporary directory
 //
 // 3. an error
-func TempCloneChdir(src string) (string, func(), error) {
-	root, cleanup, err := TempCloneDir(src)
+func TempCloneChdir(f Fatalfable, src string) (string, func(), error) {
+	root, cleanup, err := TempCloneDir(f, src)
 	if err != nil {
 		return "", nil, err
 	}

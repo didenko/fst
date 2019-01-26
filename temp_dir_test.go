@@ -144,7 +144,9 @@ func TestTempInitDirRestrictedPermissions(t *testing.T) {
 
 func ExampleTempCloneDir() {
 
-	root, cleanup, err := TempCloneDir("./mock")
+	lg := log.New(os.Stderr, "ExampleTempCloneDir", log.LUTC|log.Ldate|log.Ltime)
+
+	root, cleanup, err := TempCloneDir(lg, "./mock")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -158,7 +160,7 @@ func TestTempCloneDir(t *testing.T) {
 	const src string = "./testdata/temp_dir_mocks"
 
 	// Get the values and create the test root dir to be tested
-	testRootDir, cleanup, err := TempCloneDir(src)
+	testRootDir, cleanup, err := TempCloneDir(t, src)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +208,7 @@ func TestTempCloneChdir(t *testing.T) {
 	src := "./testdata/temp_dir_mocks"
 
 	// Get the values and clone the test root dir to be tested
-	old, cleanup, err := TempCloneChdir(src)
+	old, cleanup, err := TempCloneChdir(t, src)
 	if err != nil {
 		t.Fatal(err)
 	}
