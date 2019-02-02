@@ -1,5 +1,7 @@
 # **fst** - File System Testing aids
 
+> _**THIS IS A BETA VERSION**_. For the stable version, see tags on the `v1` branch.
+
 [![GoDoc](https://godoc.org/go.didenko.com/fst?status.svg)](https://godoc.org/go.didenko.com/fst)
 [![Build Status](https://travis-ci.org/didenko/fst.svg?branch=master)](https://travis-ci.org/didenko/fst)
 [![Go Report Card](https://goreportcard.com/badge/go.didenko.com/fst)](https://goreportcard.com/report/go.didenko.com/fst)
