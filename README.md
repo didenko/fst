@@ -6,6 +6,8 @@
 
 The suggested package name pronounciation is _"fist"_.
 
+> This is the version 1 branch of the `fst` package. The upcoming version 2 simplifies the API significantly. It is, however, backward incompatible and will require some client code modifications. The version 2 is in beta until about the end of Martch 2019 - see the v2 branch. Please, [file an issue](https://github.com/didenko/fst/issues) with a feedback or a bug.
+
 ## Purpose
 
 At times it is desireable to test a program behavior which creates or modifies files and directories. Such tests may be quite involved especially if checking permissions or timestamps. A proper cleanup is also considered a nuisance. The whole effort becomes extra burdesome as such filesystem manipulation has to be tested itself - so one ends up with tests of tests.
