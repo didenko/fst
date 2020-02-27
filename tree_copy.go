@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-// TreeCopy duplicates redular files and directories from
+// TreeCopy duplicates regular files and directories from
 // inside the source directory into an existing destination
 // directory.
 func TreeCopy(f Fatalfable, src, dst string) {

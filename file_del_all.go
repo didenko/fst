@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-// FileDelAll recursevely removes file `name` from the `root`
+// FileDelAll recursively removes file `name` from the `root`
 // directory. It is useful to get truly empty directories after
 // cloning checked out almost empty directories containing
 // a stake file like `.gitkeep`
