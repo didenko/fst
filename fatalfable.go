@@ -10,7 +10,7 @@ type Fatalfable interface {
 }
 
 type fatalCleaner struct {
-	utter Fatalfable
+	Fatalfable
 	clean func()
 }
 
@@ -20,5 +20,5 @@ func newFatalCleaner(f Fatalfable, c func()) *fatalCleaner {
 
 func (fc *fatalCleaner) Fatalf(f string, args ...interface{}) {
 	fc.clean()
-	fc.utter.Fatalf(f, args...)
+	fc.Fatalf(f, args...)
 }
