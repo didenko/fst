@@ -17,6 +17,28 @@ type Node struct {
 	body string
 }
 
+// NewNode is a plain fst.Node constructor
+// TODO: write a NewNode test
+func NewNode(
+	perm os.FileMode,
+	ts time.Time,
+	name string,
+	body string,
+) *Node {
+	return &Node{perm, ts, name, body}
+}
+
+// NewNodeNow returns a new node with predefined permission
+// and time values. Directories get 0750 and files get
+// 0640 permissions. The timestamp is set to a current time
+// TODO: write a NewNodeNow test
+func NewNodeNow(name string, body string) *Node {
+	if name[len(name)-1] == '/' {
+		return NewNode(0750, time.Now(), name, body)
+	}
+	return NewNode(0640, time.Now(), name, body)
+}
+
 // SaveAttributes sets the named file's permissions and
 // timestamps to the ones from the node.
 func (n *Node) SaveAttributes(f Fatalfable) {
