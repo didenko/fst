@@ -2,5 +2,5 @@ language: go
 go_import_path: go.didenko.com/fst
 
 go:
-  - 1.14.x
+  - 1.17.x
   - master

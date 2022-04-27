@@ -229,13 +229,13 @@ func ExampleTempCreateChdir() {
 	lg := log.New(os.Stderr, "ExampleTempCreateChdir", log.LUTC|log.Ldate|log.Ltime)
 
 	nodes := []*Node{
-		&Node{0750, Rfc3339(lg, "2001-01-01T01:01:01Z"), "a/", ""},
-		&Node{0750, Rfc3339(lg, "2001-01-01T01:01:01Z"), "b/", ""},
-		&Node{0700, Rfc3339(lg, "2001-01-01T01:01:01Z"), "c.txt", "This is a two line\nfile with\ta tab\n"},
-		&Node{0700, Rfc3339(lg, "2001-01-01T01:01:01Z"), "d.txt", "A single line without tabs"},
-		&Node{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "has\ttab/", ""},
-		&Node{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "has\ttab/e.mb", "# Markdown...\n\n... also ***possible***\n"},
-		&Node{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "\u263asmiles\u263a/", ""},
+		{0750, Rfc3339(lg, "2001-01-01T01:01:01Z"), "a/", ""},
+		{0750, Rfc3339(lg, "2001-01-01T01:01:01Z"), "b/", ""},
+		{0700, Rfc3339(lg, "2001-01-01T01:01:01Z"), "c.txt", "This is a two line\nfile with\ta tab\n"},
+		{0700, Rfc3339(lg, "2001-01-01T01:01:01Z"), "d.txt", "A single line without tabs"},
+		{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "has\ttab/", ""},
+		{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "has\ttab/e.mb", "# Markdown...\n\n... also ***possible***\n"},
+		{0700, Rfc3339(lg, "2002-01-01T01:01:01Z"), "\u263asmiles\u263a/", ""},
 	}
 
 	_, cleanup := TempCreateChdir(lg, nodes)

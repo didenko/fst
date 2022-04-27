@@ -44,13 +44,13 @@ func match(t *testing.T, f *tcase, fi os.FileInfo) {
 func TestTreeCreateFromReader(t *testing.T) {
 
 	nodes := []*Node{
-		&Node{0150, Rfc3339(t, "2001-01-01T01:01:01Z"), "aaa/", ""},
-		&Node{0700, Rfc3339(t, "2099-01-01T01:01:01Z"), "aaa/bbb/", ""},
-		&Node{0700, Rfc3339(t, "2001-01-01T01:01:01Z"), "c.txt", "This is a two line\nfile with\ta tab\n"},
-		&Node{0700, Rfc3339(t, "2001-01-01T01:01:01Z"), "d.txt", "A single line without tabs"},
-		&Node{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "has\ttab/", ""},
-		&Node{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "has\ttab/e.mb", "# Markdown...\n\n... also ***possible***\n"},
-		&Node{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "\u10077heavy quoted\u10078/", ""},
+		{0150, Rfc3339(t, "2001-01-01T01:01:01Z"), "aaa/", ""},
+		{0700, Rfc3339(t, "2099-01-01T01:01:01Z"), "aaa/bbb/", ""},
+		{0700, Rfc3339(t, "2001-01-01T01:01:01Z"), "c.txt", "This is a two line\nfile with\ta tab\n"},
+		{0700, Rfc3339(t, "2001-01-01T01:01:01Z"), "d.txt", "A single line without tabs"},
+		{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "has\ttab/", ""},
+		{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "has\ttab/e.mb", "# Markdown...\n\n... also ***possible***\n"},
+		{0700, Rfc3339(t, "2002-01-01T01:01:01Z"), "\u10077heavy quoted\u10078/", ""},
 	}
 
 	expect := []tcase{
@@ -93,13 +93,13 @@ func TestTreeCreateFromReader(t *testing.T) {
 
 func TestTreeCreateApi(t *testing.T) {
 	items := []*Node{
-		&Node{name: "aaa/", perm: 0150, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC)},
-		&Node{name: "c.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "This is a two line\nfile with\ta tab\n"},
-		&Node{name: "d.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "No need to quote a single line without tabs"},
-		&Node{name: "has\ttab/", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC)},
-		&Node{name: "has\ttab/e.mb", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
-		&Node{name: "\u10077heavy quoted\u10078", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
-		&Node{name: "aaa/bbb", perm: 0700, time: time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+		{name: "aaa/", perm: 0150, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC)},
+		{name: "c.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "This is a two line\nfile with\ta tab\n"},
+		{name: "d.txt", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: "No need to quote a single line without tabs"},
+		{name: "has\ttab/", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC)},
+		{name: "has\ttab/e.mb", perm: 0700, time: time.Date(2001, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+		{name: "\u10077heavy quoted\u10078", perm: 0700, time: time.Date(2002, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
+		{name: "aaa/bbb", perm: 0700, time: time.Date(2099, time.January, 1, 1, 1, 1, 0, time.UTC), body: ""},
 	}
 
 	expect := []tcase{
